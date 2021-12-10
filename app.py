@@ -1,4 +1,4 @@
-import time
+import os
 import dash
 import dash_bootstrap_components as dbc
 import math
@@ -18,9 +18,20 @@ import yaml
 # config_obj = yaml.safe_load(open(config_path, 'r'))
 # output_path=config_obj.get('output_path')# complete path to output directory
 
+""" First compile dataset overview"""
 output_path = "./data/"
+base_path = "./data/"
+datasets = []
+dropdowns = []
+print("=== Begin File discovery === \n...")
+for file in os.listdir(base_path):
+    d = os.path.join(base_path, file)
+    if os.path.isdir(d):
+        datasets.append(d + "/")
+        dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
+print("=== Finished File Discovery ===")
 
-pca_data = pd.read_csv(output_path + "PCA_and_clustering/PCA_results/pca_summary.csv")
+pca_data = pd.read_csv(datasets[0] + "PCA_and_clustering/PCA_results/pca_summary.csv")
 
 # prep data
 pca_resolution = 5
@@ -36,31 +47,17 @@ pca_data = pd.DataFrame(proportion_of_variance, pca_ids)
 pca_fig = px.bar(pca_data, width=300)
 pca_fig.update_layout(showlegend=False)
 
-# reading data and creating preliminary python version of 3D plot
-data = pd.read_csv(output_path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
-fig = px.scatter_3d(data, x='Dim.1', y='Dim.2', z='Dim.3', labels={},
-                    color='plot_label', hover_data=['g_name'])
-fig.update_traces(marker=dict(size=3))
+# global dataframe
+path = datasets[0]
+data = pd.read_csv(datasets[0] + "taxonomic_assignment/gene_table_taxon_assignment.csv")
 
+# Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = "MILTS"
 
 app.layout = dbc.Container(fluid=True, children=[
     dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(dbc.NavLink("Page 1", href="#")),
-            dbc.DropdownMenu(
-                children=[
-                    dbc.DropdownMenuItem("More pages", header=True),
-                    dbc.DropdownMenuItem("Page 2", href="#"),
-                    dbc.DropdownMenuItem("Page 3", href="#"),
-                ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
-        ],
-        brand="NavbarSimple",
+        brand="MILTS",
         brand_href="#",
         color="primary",
         dark=True,
@@ -73,13 +70,22 @@ app.layout = dbc.Container(fluid=True, children=[
                     id="scatter3d",
                     config={"displayModeBar": True},
                     animate=True,
-                    figure=fig,
                     className="plot",
                 )]),
             dbc.Col(children=[
                 dbc.Tabs(children=[
                     dbc.Tab(label='Overview',
                             children=[
+                                # Dataset Selection
+                                dbc.Row([
+                                    html.H5("Select Dataset"),
+                                    dcc.Dropdown(
+                                        id='dataset_select',
+                                        options=dropdowns,
+                                        value=dropdowns[0].get('value')
+                                    )
+                                ]),
+                                # Taxon Information
                                 dbc.Row([
                                     html.H5(children="General Information"),
                                     dcc.Textarea(
@@ -88,11 +94,13 @@ app.layout = dbc.Container(fluid=True, children=[
                                         disabled=True,
                                         style={'height': 200, 'width': 'fill', "verticalAlign": "top",
                                                'horizontalAlign': 'left',
+                                               'horizontalAlign': 'left',
                                                'marginLeft': '11px'},
                                     ),
                                 ]),
                                 dbc.Row([
                                     dbc.Col([
+                                        # Sequence data
                                         html.H5("Sequence Data"),
                                         html.Div(
                                             [
@@ -108,7 +116,7 @@ app.layout = dbc.Container(fluid=True, children=[
                                                         dbc.CardBody([
                                                             dcc.Textarea(
                                                                 id='textarea-sequence',
-                                                                value='Textarea content initialized\nwith multiple lines of text',
+                                                                value='Textarea',
                                                                 disabled=True,
                                                                 style={'width': '100%', 'height': 300,
                                                                        "verticalAlign": "top",
@@ -126,6 +134,7 @@ app.layout = dbc.Container(fluid=True, children=[
                     dbc.Tab(label='Filter',
                             children=[
                                 dbc.Row([
+                                    # Gene search
                                     dbc.Col(align='end', children=[
                                         html.H4("Search gene identifier"),
 
@@ -139,6 +148,7 @@ app.layout = dbc.Container(fluid=True, children=[
                                                 width="auto", className='mb-3'),
                                     ]),
                                 ]),
+                                # e-value Filter
                                 html.H5(children="Filter by e-value",
                                         style={"text-align": "center"}),
                                 dbc.Row([
@@ -173,6 +183,12 @@ app.layout = dbc.Container(fluid=True, children=[
     Input('scatter3d', 'hoverData'),
     Input('searchbar', 'value'))
 def print_hover_data(hover_data, search_data):
+    """
+    Update Basic Information
+    :param hover_data:
+    :param search_data:
+    :return:
+    """
     if not hover_data:
         return "Hover of a data point to select it"
 
@@ -201,6 +217,12 @@ def print_hover_data(hover_data, search_data):
     Input('scatter3d', 'hoverData'),
     Input('searchbar', 'value'))
 def print_seq_data(hover_data, search_data):
+    """
+    Update Sequence Data
+    :param hover_data:
+    :param search_data:
+    :return:
+    """
     if not hover_data:
         return "Hover of a data point to select it"
         # Allow user search
@@ -208,7 +230,8 @@ def print_seq_data(hover_data, search_data):
         my_dot = search_data
     else:
         my_dot = hover_data['points'][0]['customdata'][0]
-    seq = milts_files.get_protein_record(my_dot)
+    global path
+    seq = milts_files.get_protein_record(my_dot, path)
     if not seq:
         return "No matching Sequence data"
     else:
@@ -217,13 +240,27 @@ def print_seq_data(hover_data, search_data):
 
 @app.callback(
     Output('scatter3d', 'figure'),
-    Input('evalue-slider', 'value'))
-def update_dataframe(value):
+    Input('evalue-slider', 'value'),
+    Input('dataset_select', 'value')
+)
+def update_dataframe(value, new_path):
+    """
+    Update dataset and apply filters
+    :param value:
+    :param new_path:
+    :return:
+    """
+    global data
+    global path
+    path = new_path
+    data = pd.read_csv(new_path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
     value = 1 * math.e ** (-value)
     my_data = data[data.bh_evalue < value]
-    print(value)
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=['g_name'])
-    my_fig.update_traces(marker=dict(size=3))
+    my_fig.update_traces(marker=dict(size=3), hovertemplate="<br>".join([
+        "%{customdata[0]}"
+    ]))
+    my_fig.update_layout(legend={'itemsizing': 'constant'}, legend_title_text='Taxa')
     return my_fig
 
 
@@ -240,6 +277,12 @@ def reset_searchbar(n_clicks):
     [State("collapse", "is_open")],
 )
 def toggle_collapse(n, is_open):
+    """
+    Toggle Sequence information collapsible Card
+    :param n:
+    :param is_open:
+    :return:
+    """
     if n:
         return not is_open
     return is_open
