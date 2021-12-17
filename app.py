@@ -49,7 +49,6 @@ data = pd.read_csv(datasets[0] + "taxonomic_assignment/gene_table_taxon_assignme
 
 scatter_test = px.scatter_matrix(data, dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 
-# TODO change architecture to use dict for different dataframes
 data_frames = {'base': data, 'selection': data}
 selected_genes = []
 
@@ -92,13 +91,17 @@ app.layout = dbc.Container(fluid=True, children=[
                                                 options=dropdowns,
                                                 value=dropdowns[0].get('value')
                                             )
-                                        ])
-                                    ], align='center')
-                                ], align='end'),
-                                html.Hr(),
-                                # display gene information
-                                dbc.Row([
-                                    dbc.Col([
+                                        ], className="m-2"),
+                                        dbc.Card([
+                                            dbc.CardHeader("Dataset Summary"),
+                                            dcc.Textarea(
+                                                id='textarea-info',
+                                                value='Textarea',
+                                                disabled=True,
+                                                style={'height': 200, 'width': 'fill', "verticalAlign": "top",
+                                                       'horizontalAlign': 'left'},
+                                            ),
+                                        ], className="m-2"),
                                         dbc.Card([
                                             dbc.CardHeader("Selected Gene"),
                                             dcc.Textarea(
@@ -108,10 +111,46 @@ app.layout = dbc.Container(fluid=True, children=[
                                                 style={'height': 200, 'width': 'fill', "verticalAlign": "top",
                                                        'horizontalAlign': 'left'},
                                             ),
-                                        ]),
-                                    ]),
-                                ]),
+                                        ], className="m-2"),
+                                    ], align='center')
+                                ], align='end'),
+                                # display gene information
                             ], className="m-2"),
+                    dbc.Tab([
+                        dbc.Card([
+                            dbc.CardHeader("Enable/Disable Filters"),
+                            dbc.Checkbox(label="Scatterplot legend", className="m-1 form-switch"),
+                            dbc.Checkbox(label="e-value", className="m-1 form-switch"),
+                            dbc.Checkbox(label="Ignore unassigned", className="m-1 form-switch"),
+                            dbc.Checkbox(label="Ignore non-coding", className="m-1 form-switch"),
+                            dbc.Checkbox(label="Filter by scaffolds", className="m-1 form-switch"),
+                        ], className="m-2"),
+                        dbc.Card([
+                            dbc.CardHeader("e-value Filter"),
+                            dcc.Slider(
+                                id='evalue-slider',
+                                min=0,
+                                max=300,
+                                value=0,
+                                step=10,
+                                marks={0: {'label': 'e^0', 'style': {'color': '#77b0b1'}},
+                                       100: {'label': 'e^-100', 'style': {'color': '#77b0b1'}},
+                                       200: {'label': 'e^-200', 'style': {'color': '#77b0b1'}},
+                                       300: {'label': 'e^-300', 'style': {'color': '#77b0b1'}}},
+                                className="m-2",
+                            ),
+                        ], className="m-2"),
+                    ], label="Filter", className="m-2"),
+                    dbc.Tab(label='Metrics', children=[
+                        dbc.Row([
+                            dbc.Col([
+                                dbc.Card([
+                                    dbc.CardHeader("Distribution of Variables"),
+                                    dcc.Graph()
+                                ])
+                            ])
+                        ]),
+                    ]),
                     # scatter matrix
                     dbc.Tab(label='Scatter Matrix', children=[
                         dbc.Row([
@@ -170,6 +209,7 @@ app.layout = dbc.Container(fluid=True, children=[
                         html.Div([
                             dbc.ButtonGroup(
                                 [dbc.Button("Add", color="success", size="md"),
+                                 dbc.Button("Neutral", color="secondary", size="md"),
                                  dbc.Button("Remove", color="danger", size="md")],
                                 className="d-flex m-1 radio-group btn-block"
                             )
@@ -187,29 +227,6 @@ app.layout = dbc.Container(fluid=True, children=[
                         ),
                     ], className="m-2"),
                 ], label="Options", className="m-2"),
-                dbc.Tab([
-                    dbc.Card([
-                        dbc.CardHeader("Enable/Disable Filters"),
-                        dbc.Checkbox(label="Scatterplot legend", className="m-1 form-switch"),
-                        dbc.Checkbox(label="e-value", className="m-1 form-switch"),
-                        dbc.Checkbox(label="Ignore unassigned", className="m-1 form-switch"),
-                    ], className="m-2"),
-                    dbc.Card([
-                        dbc.CardHeader("e-value Filter"),
-                        dcc.Slider(
-                            id='evalue-slider',
-                            min=0,
-                            max=300,
-                            value=0,
-                            step=10,
-                            marks={0: {'label': 'e^0', 'style': {'color': '#77b0b1'}},
-                                   100: {'label': 'e^-100', 'style': {'color': '#77b0b1'}},
-                                   200: {'label': 'e^-200', 'style': {'color': '#77b0b1'}},
-                                   300: {'label': 'e^-300', 'style': {'color': '#77b0b1'}}},
-                            className="m-2",
-                        ),
-                    ], className="m-2"),
-                ], label="Filter", className="m-2"),
                 # Download Tab
                 dbc.Tab([
                     dbc.Card([
@@ -221,7 +238,12 @@ app.layout = dbc.Container(fluid=True, children=[
                             style={'height': 300},
                         ),
                     ], className="m-2"),
-                ], label="Download")
+                ], label="Download"),
+                dbc.Tab([
+                    dbc.Card([
+                        dbc.CardHeader("BLAST"),
+                    ], className="m-2"),
+                ], label="Tools")
             ]),
         ], width=4)
     ]),
