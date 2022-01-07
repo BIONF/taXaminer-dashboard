@@ -33,6 +33,7 @@ output_path = "./data/"
 base_path = "./data/"
 datasets = []
 dropdowns = []
+# TODO Check existing data direction.
 print("=== Begin File discovery === \n...")
 for file in os.listdir(base_path):
     d = os.path.join(base_path, file)
@@ -41,6 +42,8 @@ for file in os.listdir(base_path):
         dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
 print("=== Finished File Discovery ===")
 
+# TODO Check datasets[0] != undefined && datasets[0] equals milts analysis output.
+print("Datasets", datasets)
 pca_data = pd.read_csv(datasets[0] + "PCA_and_clustering/PCA_results/pca_summary.csv")
 
 # global dataframe
