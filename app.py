@@ -178,24 +178,30 @@ app.layout = dbc.Container(fluid=True, children=[
             dbc.Tabs([
                 dbc.Tab([
                     dbc.Card([
+                        # table containing only selected assignments
                         dash_table.DataTable(
-                            id='table',
+                            id='table_selection',
                             columns=[{"name": "Gene Name", "id": "g_name"},
                                      {"name": "Best Hit", "id": "best_hit"},
                                      {"name": "e-value", "id": "bh_evalue"}],
                             data=data.to_dict('records'),
+                            sort_action='native',
+                            sort_mode='multi',
                         ),
                     ], className="m-2"),
                 ], label="Selected Data"),
 
                 dbc.Tab([
                     dbc.Card([
+                        # table containing all assignments
                         dash_table.DataTable(
                             id='table_all',
                             columns=[{"name": "Gene Name", "id": "g_name"},
                                      {"name": "Best Hit", "id": "best_hit"},
                                      {"name": "e-value", "id": "bh_evalue"}],
                             data=data.to_dict('records'),
+                            sort_action='native',
+                            sort_mode='multi',
                         ),
                     ], className="m-2"),
                 ], label="Full Dataset")
@@ -317,6 +323,8 @@ def print_seq_data(hover_data, search_data):
 @app.callback(
     Output('scatter3d', 'figure'),
     Output('scatter_matrix', 'figure'),
+    Output('table_selection', 'data'),
+    Output('table_all', 'data'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
 )
@@ -344,7 +352,8 @@ def update_dataframe(value, new_path):
     scatter_side = px.scatter_matrix(my_data,
                                      dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
                                      custom_data=['g_name'])
-    return my_fig, scatter_side
+    # TODO: Sepparate Selection and "all" data for tables
+    return my_fig, scatter_side, data.to_dict('records'), data.to_dict('records')
 
 
 if __name__ == "__main__":
