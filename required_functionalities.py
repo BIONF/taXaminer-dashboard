@@ -12,13 +12,12 @@ def createHovertemplate(hover_data, head_len=2):
     count = 0
     for it in hover_data:
         if count < head_len:
-            result += "%{customdata["+str(count)+"]} "
+            result += "%{customdata[" + str(count) + "]} <br>"
         if count == head_len:
-            result += "<extra><br>"+it+" = %{customdata[" + str(count) + "]} "
+            result += "<extra>" + it + " = %{customdata[" + str(count) + "]} <br>"
         if count > head_len:
-            result += "<br>"+it+" = %{customdata[" + str(count) + "]} "
+            result += it + " = %{customdata[" + str(count) + "]} <br>"
         count += 1
-
 
     if count > head_len:
         result += "</extra>"
