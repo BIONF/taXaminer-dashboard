@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 import data_io as milts_files
+import required_functionalities as rf
 
 import numpy as np
 import sys
@@ -50,10 +51,17 @@ pca_data = pd.read_csv(datasets[0] + "PCA_and_clustering/PCA_results/pca_summary
 path = datasets[0]
 data = pd.read_csv(datasets[0] + "taxonomic_assignment/gene_table_taxon_assignment.csv")
 
+# TODO DEBUG
+print(data.columns)
+
+
 scatter_test = px.scatter_matrix(data, dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 
 data_frames = {'base': data, 'selection': data}
 selected_genes = []
+
+# Global Settings
+hover_data = ['plot_label', 'g_name', 'bh_evalue', 'best_hit', 'taxon_assignment', 'c_genelenm']
 
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -330,19 +338,19 @@ def update_dataframe(value, new_path):
     :param new_path:
     :return:
     """
+    global hover_data
     global data
     global path
     path = new_path
     data = pd.read_csv(new_path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
     value = 1 * math.e ** (-value)
     my_data = data[data.bh_evalue < value]
-    my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=['g_name'])
-    my_fig.update_traces(marker=dict(size=3), hovertemplate="<br>".join([
-        "%{customdata[0]}"
-    ]))
+    my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data)
+    my_fig.update_traces(marker=dict(size=3))
+    my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2))
 
-    my_fig.update_layout(legend={'itemsizing': 'constant'},
-                         legend_title_text='Taxa')
+    #my_fig.update_layout(legend={'itemsizing': 'constant'},
+    #                     legend_title_text='Taxa32')
 
     scatter_side = px.scatter_matrix(my_data,
                                      dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
