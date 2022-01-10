@@ -52,6 +52,16 @@ scatter_test = px.scatter_matrix(data, dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 data_frames = {'base': data, 'selection': data}
 selected_genes = []
 
+# legend manipulation tools
+list_of_labels = data['plot_label'].tolist()
+
+
+
+label_dictionary = dict.fromkeys(list_of_labels, True)
+#label_dictionary.remove('Unsassigned')
+del label_dictionary['Unassigned']
+legend_order = list(label_dictionary.keys())
+
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = "MILTS"
@@ -204,7 +214,22 @@ app.layout = dbc.Container(fluid=True, children=[
                             sort_mode='multi',
                         ),
                     ], className="m-2"),
-                ], label="Full Dataset")
+                ], label="Full Dataset"),
+
+                dbc.Tab([
+                    dbc.Card([
+                        # table containing only selected taxa
+                        dash_table.DataTable(
+                            id='legend_selection',
+                            columns=[{"name": "Gene Name", "id": "g_name"},
+                                     {"name": "Taxon", "id": "plot_label"},
+                                     {"name": "e-value", "id": "bh_evalue"}],
+                            data=data.to_dict('records'),
+                            sort_action='native',
+                            sort_mode='multi',
+                        ),
+                    ], className="m-2"),
+                ], label="Selected Taxa"),
             ]),
         ]),
         dbc.Col([
@@ -354,6 +379,37 @@ def update_dataframe(value, new_path):
                                      custom_data=['g_name'])
     # TODO: Sepparate Selection and "all" data for tables
     return my_fig, scatter_side, data.to_dict('records'), data.to_dict('records')
+
+
+@app.callback(
+    Output('legend_selection', 'data'),
+    Input('scatter3d', 'restyleData'))
+def display_click_data(selectedData):
+    #print(selectedData)
+    #print(type(selectedData))
+    #print(type(selectedData[0]['visible']))
+    update_dict = dict(zip(selectedData[1], selectedData[0]["visible"]))
+    print(update_dict)
+    print(len(update_dict))
+    #print(legend_order)
+    #print(label_dictionary)
+    for i in update_dict:
+
+        if update_dict[i] == "legendonly":
+            label_dictionary[legend_order[i]] = False
+        else:
+            label_dictionary[legend_order[i]] = True
+    print(label_dictionary)
+    #print(clickData['points'][0]['customdata'])
+    #point = json.dumps(clickData, indent=3)
+    #id = clickData["customdata"]
+    new_data = data.copy(deep=True)
+    new_data = new_data[new_data['plot_label'] != 'Unassigned']
+    for i in label_dictionary:
+        if label_dictionary[i] == False:
+            new_data = new_data[new_data['plot_label'] != i ]
+   # new_data.drop(new_data[label_dictionary[new_data['plot_label']==False]])
+    return new_data.to_dict('records')
 
 
 if __name__ == "__main__":
