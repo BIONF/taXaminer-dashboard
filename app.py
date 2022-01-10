@@ -61,7 +61,7 @@ data_frames = {'base': data, 'selection': data}
 selected_genes = []
 
 # Global Settings
-hover_data = ['plot_label', 'g_name', 'bh_evalue', 'best_hit', 'taxon_assignment', 'c_genelenm']
+hover_data = ['plot_label', 'g_name', 'bh_evalue', 'best_hit', 'taxon_assignment']
 
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
