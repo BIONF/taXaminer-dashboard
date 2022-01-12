@@ -51,10 +51,6 @@ pca_data = pd.read_csv(datasets[0] + "PCA_and_clustering/PCA_results/pca_summary
 path = datasets[0]
 data = pd.read_csv(datasets[0] + "taxonomic_assignment/gene_table_taxon_assignment.csv")
 
-# TODO DEBUG
-print(data.columns)
-
-
 scatter_test = px.scatter_matrix(data, dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 
 data_frames = {'base': data, 'selection': data}
@@ -351,19 +347,27 @@ def update_dataframe(value, new_path):
     global path
     path = new_path
     data = pd.read_csv(new_path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
+
+    color_data = pd.DataFrame({'plot_label': data['plot_label'].unique(),
+                               'taxa_color': rf.qualitativeColours(len(data['plot_label'].unique()))})
+    # TODO This would be the right place to color special taxa with a specific color.
+    data = data.merge(color_data, left_on='plot_label', right_on='plot_label')
+
     value = 1 * math.e ** (-value)
     my_data = data[data.bh_evalue < value]
-    my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data)
-    my_fig.update_traces(marker=dict(size=3))
-    my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2))
+    my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data,
+                           custom_data=['taxa_color'])
 
-    #my_fig.update_layout(legend={'itemsizing': 'constant'},
-    #                     legend_title_text='Taxa32')
+    my_fig.update_traces(marker=dict(size=3))
+    my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
+    rf.updateColorTraces(my_fig, 0)
+
+    my_fig.update_layout(legend=dict(title=dict(text='Taxa'), itemsizing='constant'))
 
     scatter_side = px.scatter_matrix(my_data,
                                      dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
                                      custom_data=['g_name'])
-    # TODO: Sepparate Selection and "all" data for tables
+
     return my_fig, scatter_side, data.to_dict('records'), data.to_dict('records')
 
 
