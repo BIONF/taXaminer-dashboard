@@ -53,7 +53,7 @@ data_frames = {'base': data, 'selection': data}
 selected_genes = []
 
 
-# legend manipulation tools
+# creating a dictionary of the legend. Values indicate the visibility
 list_of_labels = data['plot_label'].tolist()
 label_dictionary = dict.fromkeys(list_of_labels, True)
 del label_dictionary['Unassigned']
@@ -383,32 +383,25 @@ def update_dataframe(value, new_path):
     Output('legend_selection', 'data'),
     Input('scatter3d', 'restyleData'))
 def display_click_data(selectedData):
+    # removing error at the start of the program
     if selectedData is None:
         return data.to_dict('records')
-    #print(selectedData)
-    print(type(selectedData))
-    #print(type(selectedData[0]['visible']))
-    update_dict = dict(zip(selectedData[1], selectedData[0]["visible"]))
-    #print(type(update_dict))
-    #print(len(update_dict))
-    #print(legend_order)
-    #print(label_dictionary)
-    for i in update_dict:
 
+    # updting the legend dictionary with the input
+    update_dict = dict(zip(selectedData[1], selectedData[0]["visible"]))
+    for i in update_dict:
         if update_dict[i] == "legendonly":
             label_dictionary[legend_order[i]] = False
         else:
             label_dictionary[legend_order[i]] = True
-    #print(label_dictionary)
-    #print(clickData['points'][0]['customdata'])
-    #point = json.dumps(clickData, indent=3)
-    #id = clickData["customdata"]
+
+    # assembling output
     new_data = data.copy(deep=True)
     new_data = new_data[new_data['plot_label'] != 'Unassigned']
     for i in label_dictionary:
         if label_dictionary[i] == False:
             new_data = new_data[new_data['plot_label'] != i ]
-   # new_data.drop(new_data[label_dictionary[new_data['plot_label']==False]])
+
 
     return new_data.to_dict('records')
 
