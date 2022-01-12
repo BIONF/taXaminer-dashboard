@@ -283,7 +283,7 @@ def print_hover_data(click_data, search_data):
     if search_data:
         my_point = search_data
     else:
-        my_point = click_data['points'][0]['customdata'][0]
+        my_point = click_data['points'][0]['customdata'][1]
 
     # filter data frame
     global selected_genes
@@ -319,7 +319,7 @@ def print_seq_data(hover_data, search_data):
     if search_data:
         my_dot = search_data
     else:
-        my_dot = hover_data['points'][0]['customdata'][0]
+        my_dot = hover_data['points'][0]['customdata'][1]
     global path
     seq = milts_files.get_protein_record(my_dot, path)
     if not seq:
@@ -354,6 +354,7 @@ def update_dataframe(value, new_path):
     # TODO This would be the right place to color special taxa with a specific color.
     data = data.merge(color_data, left_on='plot_label', right_on='plot_label')
 
+    # e-value filter
     value = 1 * math.e ** (-value)
     my_data = data[data.bh_evalue < value]
 
@@ -366,7 +367,7 @@ def update_dataframe(value, new_path):
         my_data.at[index, 'plot_label'] = new_label
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data,
-                           custom_data=['taxa_color'])
+                           custom_data=['taxa_color', 'g_name'])
 
     my_fig.update_traces(marker=dict(size=3))
     my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2, 1))

@@ -41,7 +41,6 @@ def createHovertemplate(hover_data, head_len=2, offset=0):
 """------------------------------------------------------------"""
 
 
-
 def rgbStrToVec(color):
     """ Converts a hex color code string into a numpy 3 vector.
     :param color: Color code string. An example would be "#1A05FF".
