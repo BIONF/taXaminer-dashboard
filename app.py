@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 import data_io as milts_files
+import required_functionalities as rf
 
 import numpy as np
 import sys
@@ -33,6 +34,7 @@ output_path = "./data/"
 base_path = "./data/"
 datasets = []
 dropdowns = []
+# TODO Check existing data direction.
 print("=== Begin File discovery === \n...")
 for file in os.listdir(base_path):
     d = os.path.join(base_path, file)
@@ -41,6 +43,8 @@ for file in os.listdir(base_path):
         dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
 print("=== Finished File Discovery ===")
 
+# TODO Check datasets[0] != undefined && datasets[0] equals milts analysis output.
+print("Datasets", datasets)
 pca_data = pd.read_csv(datasets[0] + "PCA_and_clustering/PCA_results/pca_summary.csv")
 
 # global dataframe
@@ -51,6 +55,9 @@ scatter_test = px.scatter_matrix(data, dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 
 data_frames = {'base': data, 'selection': data}
 selected_genes = []
+
+# Global Settings
+hover_data = ['plot_label', 'g_name', 'bh_evalue', 'best_hit', 'taxon_assignment']
 
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -336,10 +343,17 @@ def update_dataframe(value, new_path):
     :param new_path:
     :return:
     """
+    global hover_data
     global data
     global path
     path = new_path
     data = pd.read_csv(new_path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
+
+    color_data = pd.DataFrame({'plot_label': data['plot_label'].unique(),
+                               'taxa_color': rf.qualitativeColours(len(data['plot_label'].unique()))})
+    # TODO This would be the right place to color special taxa with a specific color.
+    data = data.merge(color_data, left_on='plot_label', right_on='plot_label')
+
     value = 1 * math.e ** (-value)
     my_data = data[data.bh_evalue < value]
 
@@ -351,19 +365,19 @@ def update_dataframe(value, new_path):
         new_label = row['plot_label'] + " (" + str(taxon_counts.get(row['plot_label'])) + ")"
         my_data.at[index, 'plot_label'] = new_label
 
-    # update scatterplot
-    my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=['g_name'])
-    my_fig.update_traces(marker=dict(size=3), hovertemplate="<br>".join([
-        "%{customdata[0]}"
-    ]))
+    my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data,
+                           custom_data=['taxa_color'])
 
-    my_fig.update_layout(legend={'itemsizing': 'constant'},
-                         legend_title_text='Taxa')
+    my_fig.update_traces(marker=dict(size=3))
+    my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
+    rf.updateColorTraces(my_fig, 0)
+
+    my_fig.update_layout(legend=dict(title=dict(text='Taxa'), itemsizing='constant'))
 
     scatter_side = px.scatter_matrix(my_data,
                                      dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
                                      custom_data=['g_name'])
-    # TODO: Sepparate Selection and "all" data for tables
+
     return my_fig, scatter_side, data.to_dict('records'), data.to_dict('records')
 
 
