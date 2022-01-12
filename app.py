@@ -79,7 +79,7 @@ app.layout = dbc.Container(fluid=True, children=[
                     id="scatter3d",
                     config={"displayModeBar": True},
                     animate=True,
-                    className="plot",
+                    className="plot"
                 )]),
 
             # tabbed side menu
@@ -105,7 +105,7 @@ app.layout = dbc.Container(fluid=True, children=[
                                                 id='textarea-info',
                                                 value='Textarea',
                                                 disabled=True,
-                                                style={'height': 200, 'width': 'fill', "verticalAlign": "top",
+                                                style={'height': 150, 'width': 'fill', "verticalAlign": "top",
                                                        'horizontalAlign': 'left'},
                                             ),
                                         ], className="m-2"),
@@ -119,6 +119,16 @@ app.layout = dbc.Container(fluid=True, children=[
                                                        'horizontalAlign': 'left'},
                                             ),
                                         ], className="m-2"),
+                                        dbc.Card([
+                                            dbc.CardHeader("Amino Acid Sequence"),
+                                            dcc.Textarea(
+                                                id='textarea-as',
+                                                value='Select a datapoint',
+                                                disabled=True,
+                                                style={'height': 200, 'width': 'fill', "verticalAlign": "top",
+                                                       'horizontalAlign': 'left'},
+                                            ),
+                                        ], className="m-2")
                                     ], align='center')
                                 ], align='end'),
                                 # display gene information
@@ -242,15 +252,6 @@ app.layout = dbc.Container(fluid=True, children=[
                 ], label="Options", className="m-2"),
                 # Download Tab
                 dbc.Tab([
-                    dbc.Card([
-                        dbc.CardHeader("Amino Acid sequence"),
-                        dcc.Textarea(
-                            id='textarea-sequence',
-                            value='Textarea',
-                            disabled=True,
-                            style={'height': 300},
-                        ),
-                    ], className="m-2"),
                 ], label="Download"),
                 dbc.Tab([
                     dbc.Card([
@@ -302,7 +303,7 @@ def print_hover_data(click_data, search_data):
 
 
 @app.callback(
-    Output('textarea-sequence', 'value'),
+    Output('textarea-as', 'value'),
     Input('scatter3d', 'clickData'),
     Input('searchbar', 'value'))
 def print_seq_data(hover_data, search_data):
@@ -355,6 +356,15 @@ def update_dataframe(value, new_path):
 
     value = 1 * math.e ** (-value)
     my_data = data[data.bh_evalue < value]
+
+    # count taxon appereances
+    taxon_counts = dict(my_data['plot_label'].value_counts())
+
+    # replace labels
+    for index, row in my_data.iterrows():
+        new_label = row['plot_label'] + " (" + str(taxon_counts.get(row['plot_label'])) + ")"
+        my_data.at[index, 'plot_label'] = new_label
+
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data,
                            custom_data=['taxa_color'])
 
