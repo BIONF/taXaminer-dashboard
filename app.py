@@ -11,16 +11,6 @@ import pandas as pd
 import data_io as milts_files
 import required_functionalities as rf
 
-import numpy as np
-import sys
-import yaml
-
-# config_path = sys.argv[1]
-
-# read parameters from config file
-# config_obj = yaml.safe_load(open(config_path, 'r'))
-# output_path=config_obj.get('output_path')# complete path to output directory
-
 """
 DIRECTORY FORMAT:
 ./data/<name of MILTS run>/gene_info
@@ -108,7 +98,7 @@ app.layout = dbc.Container(fluid=True, children=[
                                         dbc.Card([
                                             dbc.CardHeader("Dataset Summary"),
                                             dcc.Textarea(
-                                                id='textarea-info',
+                                                id='summary',
                                                 value='Textarea',
                                                 disabled=True,
                                                 style={'height': 150, 'width': 'fill', "verticalAlign": "top",
@@ -364,6 +354,7 @@ def print_seq_data(hover_data, search_data):
     Output('scatter_matrix', 'figure'),
     Output('table_selection', 'data'),
     Output('table_all', 'data'),
+    Output('summary', 'value'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
 )
@@ -417,7 +408,15 @@ def update_dataframe(value, new_path):
                                      dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
                                      custom_data=['g_name'])
 
-    return my_fig, scatter_side, data.to_dict('records'), data.to_dict('records')
+    # load summary information
+    try:
+        with open(new_path + 'gene_info/summary.txt') as f:
+            summary = f.readlines()
+    except FileNotFoundError:
+        summary = "File summary.txt not found"
+    summary = "".join(summary)
+
+    return my_fig, scatter_side, data.to_dict('records'), data.to_dict('records'), summary
 
 
 @app.callback(
