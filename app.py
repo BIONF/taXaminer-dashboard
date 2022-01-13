@@ -56,13 +56,11 @@ scatter_test = px.scatter_matrix(data, dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 data_frames = {'base': data, 'selection': data}
 selected_genes = []
 
-
 # creating a dictionary of the legend. Values indicate the visibility
 list_of_labels = data['plot_label'].tolist()
 label_dictionary = dict.fromkeys(list_of_labels, True)
 del label_dictionary['Unassigned']
 legend_order = list(label_dictionary.keys())
-
 
 # Global Settings
 hover_data = ['plot_label', 'g_name', 'bh_evalue', 'best_hit', 'taxon_assignment']
@@ -126,6 +124,16 @@ app.layout = dbc.Container(fluid=True, children=[
                                                 style={'height': 200, 'width': 'fill', "verticalAlign": "top",
                                                        'horizontalAlign': 'left'},
                                             ),
+                                            html.Div([
+                                                dbc.Button(
+                                                    "Find Best hit on NCBI",
+                                                    id='NCBI',
+                                                    href="https://www.ncbi.nlm.nih.gov/",
+                                                    external_link=True,
+                                                    color='primary',
+                                                    target='_blank',
+                                                ),
+                                            ], className="d-grid gap-2")
                                         ], className="m-2"),
                                         dbc.Card([
                                             dbc.CardHeader("Amino Acid Sequence"),
@@ -244,7 +252,7 @@ app.layout = dbc.Container(fluid=True, children=[
                             sort_mode='multi',
                         ),
                     ], className="m-2"),
-                ], label="Selected Taxa"),
+                ], label="Taxa visible in plot"),
             ]),
         ]),
         dbc.Col([
@@ -362,9 +370,9 @@ def print_seq_data(hover_data, search_data):
 def update_dataframe(value, new_path):
     """
     Update dataset and apply filters
-    :param value:
-    :param new_path:
-    :return:
+    :param value: value of e-value slider
+    :param new_path: path to dataset
+    :return: New values for UI Components
     """
     global hover_data
     global data
@@ -372,6 +380,13 @@ def update_dataframe(value, new_path):
     path = new_path
     data = pd.read_csv(new_path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
 
+    # legend selection
+    global label_dictionary, legend_order
+    label_dictionary = dict.fromkeys(data['plot_label'].tolist(), True)
+    del label_dictionary['Unassigned']
+    legend_order = list(label_dictionary.keys())
+
+    # color legend
     color_data = pd.DataFrame({'plot_label': data['plot_label'].unique(),
                                'taxa_color': rf.qualitativeColours(len(data['plot_label'].unique()))})
     # TODO This would be the right place to color special taxa with a specific color.
@@ -390,7 +405,7 @@ def update_dataframe(value, new_path):
         my_data.at[index, 'plot_label'] = new_label
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3', color='plot_label', hover_data=hover_data,
-                           custom_data=['taxa_color', 'g_name'])
+                           custom_data=['taxa_color', 'g_name', 'best_hit'])
 
     my_fig.update_traces(marker=dict(size=3))
     my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
@@ -413,7 +428,7 @@ def display_click_data(selectedData):
     if selectedData is None:
         return data.to_dict('records')
 
-    # updting the legend dictionary with the input
+    # updating the legend dictionary with the input
     update_dict = dict(zip(selectedData[1], selectedData[0]["visible"]))
     for i in update_dict:
         if update_dict[i] == "legendonly":
@@ -425,11 +440,31 @@ def display_click_data(selectedData):
     new_data = data.copy(deep=True)
     new_data = new_data[new_data['plot_label'] != 'Unassigned']
     for i in label_dictionary:
-        if label_dictionary[i] == False:
-            new_data = new_data[new_data['plot_label'] != i ]
-
+        if not label_dictionary[i]:
+            new_data = new_data[new_data['plot_label'] != i]
 
     return new_data.to_dict('records')
+
+
+@app.callback(
+    Output('NCBI', 'href'),
+    Input('scatter3d', 'clickData'))
+def print_link(click_data):
+    """
+    Build a NCBI search term link upon Button press
+    :param click_data: Selected datapoint in scatterplot
+    :return: search term link
+    """
+    # catch invalid data
+    if not click_data:
+        return ""
+    else:
+        global data
+        # build link
+        output_link = ""
+        output_link += "http://www.ncbi.nlm.nih.gov/taxonomy/?term="
+        output_link += click_data['points'][0]['customdata'][2]
+        return output_link
 
 
 if __name__ == "__main__":
