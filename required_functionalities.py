@@ -1,8 +1,9 @@
-"""This file is like a short engine. """
-"""The main purpose is to store all required functions, to prevent the app.py to be fill with spam """
-
 import math
 import numpy as np
+
+"""This file is like a short engine. 
+The main purpose is to store all required functions, to prevent the app.py 
+to be filled with spam """
 
 """------------------------------------------------------------"""
 """----------Everything that belongs to plot hovering.---------"""
@@ -11,10 +12,13 @@ import numpy as np
 
 def createHovertemplate(hover_data, head_len=2, offset=0):
     """ Generate a hovertemplate string for a 3d python dash graph.
-    :param hover_data:  List of values which are displayed by hovering. Value names have to be part of data.columns
-    :param head_len:    Specifies how many values displayed in headline. The rest will be in description list.
-    :param offset:      Hover data and custom data are stored in the same custom data object. This simply offset
-                        can be used to ignore the origin custom data.
+    :param hover_data:  List of values which are displayed by hovering.
+    Value names have to be part of data.columns
+    :param head_len:    Specifies how many values displayed in headline.
+    The rest will be in description list.
+    :param offset:      Hover data and custom data are stored in the same
+    custom data object. This simply offset can be used to ignore the origin
+    custom data.
     :return:            Returns a string which can be used as a hovertemplate
     """
     result = ""
@@ -23,7 +27,8 @@ def createHovertemplate(hover_data, head_len=2, offset=0):
         if count < head_len:
             result += "%{customdata[" + str(count + offset) + "]} <br>"
         if count == head_len:
-            result += "<extra>" + it + " = %{customdata[" + str(count + offset) + "]} <br>"
+            result += "<extra>" + it + " = %{customdata[" + \
+                      str(count + offset) + "]} <br>"
         if count > head_len:
             result += it + " = %{customdata[" + str(count + offset) + "]} <br>"
         count += 1
@@ -47,7 +52,9 @@ def rgbStrToVec(color):
     :return: Returns a numpy 3 vector with red green and blue value.
     """
     try:
-        return np.array([int("0x" + color[1:3], 16), int("0x" + color[3:5], 16), int("0x" + color[5:7], 16)])
+        return np.array([int("0x" + color[1:3], 16),
+                         int("0x" + color[3:5], 16),
+                         int("0x" + color[5:7], 16)])
     except ... as error:
         # TODO Exchange print with common log function.
         print("Error: required_functionalities->rgbStrToVec():", error)
@@ -55,7 +62,8 @@ def rgbStrToVec(color):
 
 
 def rgbVecToStr(c_vec):
-    """ Converts a numpy 3 vector within int variables into a rbg hex color code string.
+    """ Converts a numpy 3 vector within int variables into a rbg hex color
+    code string.
     :param c_vec: Numpy 3 vector within int variables between 0 and 255.
     :return: Returns a string with a hex color code.
     """
@@ -70,8 +78,9 @@ def rgbVecToStr(c_vec):
         if c_vec[2] < 0: c_vec[2] = 0;
         if c_vec[2] > 255: c_vec[2] = 255;
 
-        return "#" + str(hex(c_vec[0]))[2:4].zfill(2) + str(hex(c_vec[1]))[2:4].zfill(2) + str(hex(c_vec[2]))[
-                                                                                           2:4].zfill(2)
+        return "#" + str(hex(c_vec[0]))[2:4].zfill(2) + \
+               str(hex(c_vec[1]))[2:4].zfill(2) + \
+               str(hex(c_vec[2]))[2:4].zfill(2)
     except ... as error:
         # TODO Exchange print with common log function.
         print("Error: required_functionalities->rgbVecToStr()", error)
@@ -81,7 +90,8 @@ def rgbVecToStr(c_vec):
 def colorRampPalette(colors, n):
     """ Interpolate colors linearly to create a color palette.
     :param colors:  List with color hex strings which is based on.
-    :param n:       Number of required colors. That effects the greatness of return list.
+    :param n:       Number of required colors. That effects the greatness
+    of return list.
     :return:        Gives a list with hex color strings.
     """
     result = []
@@ -101,21 +111,24 @@ def colorRampPalette(colors, n):
             v_color_a = rgbStrToVec(colors[math.floor(step * i)])
             v_color_b = rgbStrToVec(colors[math.ceil(step * i)])
 
-            v_color = (v_color_a + (v_color_b - v_color_a) * (step * i % 1)).astype(int)
+            v_color = (v_color_a + (v_color_b - v_color_a) *
+                       (step * i % 1)).astype(int)
             result.append(rgbVecToStr(v_color))
 
     return result
 
 
 def qualitativeColours(n):
-    """ Generates a color palette in order to be able to differentiate between individual taxa as well as possible.
+    """ Generates a color palette in order to be able to differentiate between
+    individual taxa as well as possible.
     :param n:   Number of required colors.
     :return:    Gives a list with hex color strings.
     """
     color_root = ['#ab0000', "#f0ac00", "#449600", "#00db8b", "#23157d"]
 
     if n > 5:
-        color_root = ["#DF0101", "#FFFF00", "#298A08", "#00FF00", "#01DFD7", "#0101DF", "#F781BE"]
+        color_root = ["#DF0101", "#FFFF00", "#298A08", "#00FF00",
+                      "#01DFD7", "#0101DF", "#F781BE"]
 
     return colorRampPalette(color_root, n)
 
@@ -123,9 +136,11 @@ def qualitativeColours(n):
 def updateColorTraces(fig, custom_d_index):
     """ Manual update_traces() function for python dash figure,
         witch is simply write a custom variable into the marker color.
-        This function is just a specific bug solution and only usable with Scatter3d traces.
+        This function is just a specific bug solution and only usable with
+        Scatter3d traces.
     :param fig: Python dash scatter_3d figure witch should be updated.
-    :param custom_d_index: Index of custom variable in the corresponding trace. Effects something like %customdata[i].
+    :param custom_d_index: Index of custom variable in the corresponding trace.
+    Effects something like %customdata[i].
     :return: All updates are by reference, hence it returns void.
     """
 
