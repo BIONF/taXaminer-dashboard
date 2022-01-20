@@ -195,6 +195,11 @@ class Layout:
 
                         dbc.Tab([
                             dbc.Card([
+                                # button to add visible points to selection
+                                dbc.Button("Click here to Add the contents of this table to the download selection", color="success",
+                                           size="md",
+                                           id="button_add_legend_to_select"),
+
                                 # table containing only selected taxa
                                 dash_table.DataTable(
                                     id='legend_selection',

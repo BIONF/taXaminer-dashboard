@@ -96,8 +96,9 @@ def print_seq_data(hover_data, search_data):
     Input('table_all', 'active_cell'),
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
+    Input('button_add_legend_to_select','n_clicks')
 )
-def select(click_data, selection_table_cell, all_table_cell, search_data, button_reset):
+def select(click_data, selection_table_cell, all_table_cell, search_data, button_reset,button_add_legend_to_select):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -155,6 +156,19 @@ def select(click_data, selection_table_cell, all_table_cell, search_data, button
     last_selection = my_point
     if changed_id == 'button_reset.n_clicks':
         my_dataset.reset_selection()
+
+    # add visible taxa to selection
+    if changed_id == 'button_add_legend_to_select.n_clicks':
+        new_data = my_dataset.get_data_original().copy(deep=True)
+        new_data = new_data[new_data['plot_label'] != 'Unassigned']
+        for i in label_dictionary:
+            if not label_dictionary[i]:
+                new_data = new_data[new_data['plot_label'] != i]
+
+        genes_list = new_data['g_name'].tolist()
+        for i in genes_list:
+            my_dataset.select(i)
+
 
     return my_dataset.get_selected_data().to_dict('records'),\
            output_text
@@ -261,6 +275,11 @@ def update_dataframe(value, new_path):
     Output('legend_selection', 'data'),
     Input('scatter3d', 'restyleData'))
 def display_click_data(selectedData):
+    """
+    function to update the table with the Taxa visble in plot
+    :param selectedData:
+    :return: updated dataset to build the table new according to the visible parts of the legend
+    """
     # removing error at the start of the program
     if selectedData is None:
         return my_dataset.get_data_original().to_dict('records')
