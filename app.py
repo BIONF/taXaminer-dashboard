@@ -3,7 +3,7 @@ import dash
 import dash_bootstrap_components as dbc
 import math
 import layout
-from dash import callback_context
+from dash import callback_context, dcc
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
@@ -24,7 +24,6 @@ output_path = "./data/"
 base_path = "./data/"
 datasets = []
 dropdowns = []
-
 
 for file in os.listdir(base_path):
     d = os.path.join(base_path, file)
@@ -97,7 +96,8 @@ def print_seq_data(hover_data, search_data):
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
 )
-def select(click_data, selection_table_cell, all_table_cell, search_data, button_reset):
+def select(click_data, selection_table_cell, all_table_cell, search_data,
+           button_reset):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -120,7 +120,9 @@ def select(click_data, selection_table_cell, all_table_cell, search_data, button
     # input from table of selected genes
     if selection_table_cell:
         try:
-            cell = my_dataset.get_selected_data().iloc[selection_table_cell['row']]['g_name']
+            cell = \
+            my_dataset.get_selected_data().iloc[selection_table_cell['row']][
+                'g_name']
             if cell != last_selection:
                 my_point = cell
         except IndexError:
@@ -156,8 +158,7 @@ def select(click_data, selection_table_cell, all_table_cell, search_data, button
     if changed_id == 'button_reset.n_clicks':
         my_dataset.reset_selection()
 
-    return my_dataset.get_selected_data().to_dict('records'),\
-           output_text
+    return my_dataset.get_selected_data().to_dict('records'), output_text
 
 
 @app.callback(
@@ -234,7 +235,8 @@ def update_dataframe(value, new_path):
                            custom_data=['taxa_color', 'g_name', 'best_hit'])
 
     my_fig.update_traces(marker=dict(size=3))
-    my_fig.update_traces(hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
+    my_fig.update_traces(
+        hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
     rf.updateColorTraces(my_fig, 0)
 
     my_fig.update_layout(legend=dict(title=dict(text='Taxa'),
@@ -301,6 +303,21 @@ def print_link(click_data):
         output_link += "http://www.ncbi.nlm.nih.gov/taxonomy/?term="
         output_link += click_data['points'][0]['customdata'][2]
         return output_link
+
+
+@app.callback(
+    Output("download-selection", "data"),
+    Input('btn-download', 'n_clicks'),
+    prevent_initial_call=True
+)
+def download(click_data):
+    """
+    Complie a new .fasta file of as-sequences based on the users selection
+    :param click_data: data from the corresponding button
+    :return: dcc.send_file
+    """
+    link = milts_files.write_protein_sequences(my_dataset.selection_keys, path)
+    return dcc.send_file(link)
 
 
 if __name__ == "__main__":

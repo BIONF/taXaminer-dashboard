@@ -250,6 +250,15 @@ class Layout:
                         ], label="Options", className="m-2"),
                         # Download Tab
                         dbc.Tab([
+                            html.Div([
+                                dbc.Button(
+                                    "Download selected amino acid sequences as .fasta",
+                                    id='btn-download',
+                                    color='primary',
+                                    target='_blank',
+                                ),
+                            ], className="d-grid gap-2"),
+                            dcc.Download(id="download-selection")
                         ], label="Download"),
                         dbc.Tab([
                             dbc.Card([
