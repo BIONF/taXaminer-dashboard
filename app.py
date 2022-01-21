@@ -213,6 +213,8 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('table_all', 'data'),
     Output('summary', 'value'),
     Output('table_selection', 'active_cell'),
+    Output('contribution', 'figure'),
+    Output('scree', 'figure'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
 )
@@ -257,6 +259,32 @@ def update_dataframe(value, new_path):
                                      dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
                                      custom_data=['g_name'])
 
+    # contribution of variables
+    contribution_data = pd.read_csv(new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
+    contribution_fig = px.scatter(contribution_data,
+                                  title="Contribution of variables",
+                                  x="PC1", y="PC2",
+                                  text="Unnamed: 0",
+                                  range_x=[-1, 1], range_y=[-1, 1])
+    contribution_fig.update_traces(textposition='top center')
+
+    # scree plot
+    pca_data = pd.read_csv(new_path + "PCA_and_clustering\PCA_results\pca_summary.csv")
+    pca_resolution = 5
+    proportion_of_variance = []
+    pca_ids = []
+    for i in range(1, pca_resolution + 1):
+        curr_value = pca_data.get("PC" + str(i))
+        pca_ids.append("PC" + str(i))
+        proportion_of_variance.append(curr_value[1])
+
+    pca_data = pd.DataFrame(proportion_of_variance, pca_ids)
+    scree_fig = px.bar(pca_data,
+                       title="Scree Plot",
+                       height=350)
+    scree_fig.update_layout(yaxis_title="Contribution to total variance",
+                            showlegend=False)
+
     # load summary information
     try:
         with open(new_path + 'gene_info/summary.txt') as f:
@@ -267,7 +295,8 @@ def update_dataframe(value, new_path):
 
     # update reference path
     path = new_path
-    return my_fig, scatter_side, data.to_dict('records'), summary, None
+    return my_fig, scatter_side, data.to_dict('records'), summary, None, \
+           contribution_fig, scree_fig
 
 
 @app.callback(

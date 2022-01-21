@@ -123,13 +123,17 @@ class Layout:
                                     ),
                                 ], className="m-2"),
                             ], label="Filter", className="m-2"),
-                            dbc.Tab(label='Metrics', children=[
+                            dbc.Tab(label='PCA', children=[
                                 dbc.Row([
                                     dbc.Col([
                                         dbc.Card([
-                                            dbc.CardHeader("Distribution "
-                                                           "of Variables"),
-                                            dcc.Graph()
+                                            dbc.CardHeader("PCA Data"),
+                                            dcc.Graph(
+                                                id="contribution"
+                                            ),
+                                            dcc.Graph(
+                                                id="scree"
+                                            )
                                         ])
                                     ])
                                 ]),
