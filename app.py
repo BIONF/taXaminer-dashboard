@@ -108,6 +108,7 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
+    :param select_data: select data from scatter matrix
     :param selection_table_cell: cell index from table of selected sequences
     :param all_table_cell: cell index from all table
     :param search_data: value of the searchbar
@@ -343,6 +344,13 @@ def update_dataframe(value, new_path):
     Input('legend_selection', 'columns')
 )
 def updateScatterMatrix(value, scat_3d, legend):
+    """
+     Update scatter matrix with current selection.
+    :param value: Value of e-value slider.
+    :param scat_3d: scat_3d figure to trigger graph updates.
+    :param legend: legend_selection columns changes trigger.
+    :return:
+    """
     global my_dataset
     value = 1 * math.e ** (-value)
     my_data = my_dataset.get_plot_data({'e-value': value})
