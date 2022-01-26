@@ -40,19 +40,46 @@ class DataSet:
             plot_data.at[index, 'plot_label'] = new_label
         return plot_data
 
-    def get_selected_data(self):
+    def selected_merge(self, data=None):
+        if data is None:
+            data = self.original_data
+
+        if len(self.selection_keys) == 0:
+            return data.assign(selected=False)
+
+        if len(self.selection_keys) == len(data.index):
+            return data.assign(selected=True)
+
+        return (data[~data['g_name'].isin(self.selection_keys)].assign(selected=False)).append(
+                data[data['g_name'].isin(self.selection_keys)].assign(selected=True))
+
+    def get_selected_data(self, data=None):
         """
         Get a pandas dataframe of currently selected rows
         :return: filtered pandas dataframe
         """
-        original_data = self.original_data
+        if data is None:
+            data = self.original_data
 
         if len(self.selection_keys) == 0:
-            cols = original_data.columns
+            cols = data.columns
             empty_frame = pd.DataFrame(columns=cols)
             return empty_frame
         # select by keys
-        return original_data[original_data['g_name'].isin(self.selection_keys)]
+        return data[data['g_name'].isin(self.selection_keys)]
+
+    def get_unselected_data(self, data=None):
+        """
+        Get a pandas dataframe of currently not selected rows
+        :return: filtered pandas dataframe
+        """
+        if data is None:
+            data = self.original_data
+
+        if len(self.selection_keys) == 0:
+            return data
+        # select by keys
+        return data[~data['g_name'].isin(self.selection_keys)]
 
     def select(self, key):
         """
