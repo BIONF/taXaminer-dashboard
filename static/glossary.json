@@ -1,10 +1,170 @@
 {
   "g_name": {
-    "short": "Gene Name",
-    "details": "..."
+    "short": "gene name",
+    "details": "gene name"
   },
   "c_name": {
     "short": "contig name",
+    "details": "name of the contig the given gene is located on"
+  },
+  "c_len": {
+    "short": "contig length",
     "details": "..."
+  },
+  "c_num_of_genes":{
+    "short": "genes on contig",
+    "details": "number of genes annotated on the given contig"
+  },
+  "c_pct_assemby_len": {
+    "short": "percentage of assembly length",
+    "details": "proportion of total assembly length contained in the given contig"
+  },
+  "c_genelenm": {
+    "short": "mean gene length (contig)",
+    "details": "mean gene length on the given contig"
+  },
+  "c_genelensd": {
+    "short": "gene length stand. deviation",
+    "details": "standard deviation of the gene lengths in the set of genes annotated on the given contig"
+  },
+  "c_cov_0": {
+    "short": "mean read coverage",
+    "details": "mean read coverage of the given contig"
+  },
+  "c_covsd_0": {
+    "short": "standard deviation of read coverage",
+    "details": "standard deviation of read coverage along the given contig"
+  },
+  "c_covdev_0": {
+    "short": "deviation from mean assembly coverage",
+    "details": "extent to which 'c_cov' deviates from the mean assembly coverage, in units of total assembly coverage SD"
+  },
+  "c_genecovm_0": {
+    "short": "mean read coverage",
+    "details": "mean read coverage in the set of genes annotated on the given contig"
+  },
+  "c_genecovsd_0": {
+    "short": "standard deviation (read coverage)",
+    "details": "standard deviation of the read coverage in the set of genes annotated on the given contig"
+  },
+  "c_pearson_r": {
+    "short": "Pearson's correlation coefficient",
+    "details": "Pearson’s correlation coefficient for the tetranucleotide-derived z-score vectors of the given contig and the overall assembly"
+  },
+  "c_pearson_p": {
+    "short": "correlation p-value",
+    "details": "probability (p-value) for two random sequences to show a correlation that is at least as high as 'c_pearson_r'"
+  },
+  "c_gc_cont": {
+    "short": "GC content",
+    "details": "percentage of GC content in the given contig"
+  },
+  "c_gcdev": {
+    "short": "GC content deviation",
+    "details": "extent to which 'c_gc_cont' deviates from the mean assembly GC content, in units of total assembly GC SD"
+  },
+  "g_len": {
+    "short": "gene length",
+    "details": "length of the given gene"
+  },
+  "g_lendev_c": {
+    "short": "gene length deviation",
+    "details": "extent to which 'g_len' deviates from the corresponding c_genelenm, in units of 'c_genelensd'"
+  },
+  "g_lendev_o": {
+    "short": "gene length deviation from avg. gene lenght",
+    "details": "extent to which 'g_len' deviates from the average gene length in the assembly, in units of the length SD over the complete set of genes in this assembly"
+  },
+  "g_abspos": {
+    "short": "gene position",
+    "details": "absolute position of the gene (the closer to contig centre, the closer 'g_abpspos' to 0; the closer to either contig end, the closer g_abpspos to 1)"
+  },
+  "g_terminal": {
+    "short": "terminal gene classifier",
+    "details": "classifier of terminal genes (1 if gene is terminal, 0 if not)"
+  },
+  "g_single": {
+    "short": "single gene classifier",
+    "details": "classifier of single genes (1 if the given gene is the only gene annotated on its contig, 0 if not)"
+  },
+  "g_cov_0": {
+    "short": "mean read coverage",
+    "details": "mean read coverage of the given gene"
+  },
+  "g_covsd_0": {
+    "short": "eviation of the read coverage",
+    "details": "standard deviation of the read coverage along the given gene"
+  },
+  "g_covdev_c_0": {
+    "short": "mean gene cov. dev.",
+    "details": "extent to which 'g_cov' deviates from the corresponding 'c_genecovm', in units of 'c_genecovsd'"
+  },
+  "g_covdev_o_0": {
+    "short": "gene cov. dev. from avg. gene dev.",
+    "details": "extent to which 'g_cov' deviates from the average gene coverage in the assembly, in units of the coverage SD over the complete set of genes in this assembly"
+  },
+  "g_pearson_r_o": {
+    "short": "Pearson's corr.coefficient",
+    "details": "Pearson’s correlation coefficient for the tetranucleotide-derived z-score vectors of the given gene and the overall assembly"
+  },
+  "g_pearson_p_o": {
+    "short": "corr. p-value with random data",
+    "details": "probability (p-value) of a random data set to show a correlation with the overall assembly composition that is at least as high as 'g_pearson_r_o'"
+  },
+  "g_pearson_r_c": {
+    "short": "Pearson's corr. coefficient (with contig)",
+    "details": "Pearson’s correlation coefficient for the tetranucleotide-derived z-score vectors of the given gene and its respective contig"
+  },
+  "g_pearson_p_c": {
+    "short": "% correlation of two random sequences of Pearson's corr.",
+    "details": "probability (p-value) for two random sequences to show a correlation that is at least as high as 'g_pearson_r_c'"
+  },
+  "g_gc_cont": {
+    "short": "GC content in gene",
+    "details": "percentage of GC content in the given gene"
+  },
+  "g_gcdev_c": {
+    "short": "deviation from mean GC content",
+    "details": "extent to which 'g_gc_cont' deviates from the mean gene GC content, in units of GC SD over the set of genes on the corresponding contig"
+  },
+  "g_gcdev_o": {
+    "short": "deviation from GC content (GC SD)",
+    "details": "extent to which 'g_gc_cont' deviates from the mean GC content in overall gene set, in units of GC SD over the complete set of genes in this assembly"
+  },
+  "protID": {
+    "short": "protein ID",
+    "details": "protein ID / header in FASTA file that was matched to gene ID and corresponding sequence is used for taxonomic assignment"
+  },
+  "lcaID": {
+    "short": "LCA NCBI taxon ID",
+    "details": "NCBI taxon ID of LCA of hits in 10% score range of best hit"
+  },
+  "lca": {
+    "short": "LCA name",
+    "details": "name of taxon corresponding to 'lcaID'"
+  },
+  "best_hitID": {
+    "short": "NCBI taxon ID (best hit)",
+    "details": "NCBI taxon ID of best hit"
+  },
+  "best_hit":{
+    "short": "Best hit Taxon",
+    "details": "name of taxon corresponding to 'best_hitID"
+  },
+  "bh_evalue": {
+    "short": "best hit e-value",
+    "details": "e-value of best hit"
+  },
+  "corrected_lca": {
+    "short": "Corrected LCA",
+    "details": "LCA of best hit and query species"
+  },
+  "taxon_assignment": {
+    "short": "taxonomic assignment",
+    "details": "final taxonomic assignment: LCA if LCA is not in query's lineage, else the corrected LCA"
+  },
+  "plot_label": {
+    "short": "assigned plot label",
+    "details": "final label for gene displayed in plot after merging of taxonomic assignments"
   }
 }
