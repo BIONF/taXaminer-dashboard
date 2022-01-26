@@ -133,7 +133,7 @@ def qualitativeColours(n):
     return colorRampPalette(color_root, n)
 
 
-def updateColorTraces(fig, custom_d_index):
+def SetCustomColorTraces(fig, custom_d_index):
     """ Manual update_traces() function for python dash figure,
         witch is simply write a custom variable into the marker color.
         This function is just a specific bug solution and only usable with
@@ -143,10 +143,11 @@ def updateColorTraces(fig, custom_d_index):
     Effects something like %customdata[i].
     :return: All updates are by reference, hence it returns void.
     """
-
     for trace in fig.data:
         try:
             trace['marker']['color'] = trace['customdata'][0][custom_d_index]
         except ... as error:
             # TODO Exchange print with common log function.
             print("Error: required_functionalities->updateColorTraces:", error)
+
+

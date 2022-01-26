@@ -6,6 +6,7 @@ import layout
 from dash import callback_context, dcc
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 from utility import data_io as milts_files
 from utility import dataset as ds
@@ -36,9 +37,6 @@ print("Datasets", datasets)
 my_dataset = ds.DataSet(datasets[0])
 path = datasets[0]
 
-# scatter matrix
-scatter_test = px.scatter_matrix(my_dataset.get_data_original(),
-                                 dimensions=['Dim.1', 'Dim.2', 'Dim.3'])
 
 # creating a dictionary of the legend. Values indicate the visibility
 list_of_labels = my_dataset.get_data_original()['plot_label'].tolist()
@@ -52,6 +50,7 @@ hover_data = ['plot_label', 'g_name', 'bh_evalue',
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
+recent_select_data = None                       # TODO
 last_selection = None
 
 # Init app
@@ -60,7 +59,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
 app.title = "MILTS"
 
 my_layout = layout.Layout()
-app.layout = my_layout.get_layout(dropdowns, scatter_test, my_dataset)
+app.layout = my_layout.get_layout(dropdowns, my_dataset)
 
 
 @app.callback(
@@ -96,6 +95,7 @@ def print_seq_data(hover_data, search_data):
     Output('table_all', 'columns'),
     Output('legend_selection', 'columns'),
     Input('scatter3d', 'clickData'),
+    Input('scatter_matrix', 'selectedData'),
     Input('table_selection', 'active_cell'),
     Input('table_all', 'active_cell'),
     Input('searchbar', 'value'),
@@ -104,12 +104,13 @@ def print_seq_data(hover_data, search_data):
     Input('variable-selection', 'value'),
     Input('btn-reload', 'n_clicks')
 )
-def select(click_data, selection_table_cell, all_table_cell, search_data,
+def select(click_data, select_data, selection_table_cell, all_table_cell, search_data,
            button_reset, button_add_legend_to_select, selected_vars,
            reload):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
+    :param select_data: select data from scatter matrix
     :param selection_table_cell: cell index from table of selected sequences
     :param all_table_cell: cell index from all table
     :param search_data: value of the searchbar
@@ -117,9 +118,20 @@ def select(click_data, selection_table_cell, all_table_cell, search_data,
     """
     my_point = ""
     global recent_click_data
+    global recent_select_data
     global last_selection
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    # scatter matrix select
+    if select_data and select_data != recent_select_data:
+        recent_select_data = select_data
+        for it in (select_data['points']):
+            # Node that neutral mode will also select.
+            if is_remove_mode:
+                my_dataset.unselect(it['customdata'][1])
+            else:
+                my_dataset.select(it['customdata'][1])
+
 
     # plot click
     if click_data and click_data != recent_click_data:
@@ -242,14 +254,13 @@ def update_selection_mode(button_add, button_remove, button_neutral):
 
 @app.callback(
     Output('scatter3d', 'figure'),
-    Output('scatter_matrix', 'figure'),
     Output('table_all', 'data'),
     Output('summary', 'value'),
     Output('table_selection', 'active_cell'),
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
     Input('evalue-slider', 'value'),
-    Input('dataset_select', 'value'),
+    Input('dataset_select', 'value')
 )
 def update_dataframe(value, new_path):
     """
@@ -283,14 +294,12 @@ def update_dataframe(value, new_path):
     my_fig.update_traces(marker=dict(size=3))
     my_fig.update_traces(
         hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
-    rf.updateColorTraces(my_fig, 0)
+    rf.SetCustomColorTraces(my_fig, 0)
 
     my_fig.update_layout(legend=dict(title=dict(text='Taxa'),
                                      itemsizing='constant'))
 
-    scatter_side = px.scatter_matrix(my_data,
-                                     dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
-                                     custom_data=['g_name'])
+    # scatter_side is outsourced to update_scatter_matrix()
 
     # contribution of variables
     contribution_data = pd.read_csv(
@@ -330,9 +339,43 @@ def update_dataframe(value, new_path):
 
     # update reference path
     path = new_path
-    return my_fig, scatter_side, data.to_dict('records'), summary, None, \
-           contribution_fig, scree_fig
+    return my_fig, data.to_dict('records'), summary, None, contribution_fig, scree_fig
 
+@app.callback(
+    Output('scatter_matrix', 'figure'),
+    Input('evalue-slider', 'value'),
+    Input('scatter3d', 'figure'),
+    Input('legend_selection', 'columns')
+)
+def updateScatterMatrix(value, scat_3d, legend):
+    """
+     Update scatter matrix with current selection.
+    :param value: Value of e-value slider.
+    :param scat_3d: scat_3d figure to trigger graph updates.
+    :param legend: legend_selection columns changes trigger.
+    :return:
+    """
+    global my_dataset
+    value = 1 * math.e ** (-value)
+    my_data = my_dataset.get_plot_data({'e-value': value})
+    scatter_side = px.scatter_matrix(my_dataset.selected_merge(my_data),
+                                     dimensions=['Dim.1', 'Dim.2', 'Dim.3'],
+                                     color='selected',
+                                     custom_data=['selected', 'g_name'])
+
+    scatter_side.update_traces(hovertemplate='%{customdata[1]}<br>%{xaxis.title.text}=%{x}<br>%{yaxis.title.text}=%{'
+                                             'y}<extra></extra>',
+                               showlegend=False)
+
+    # Override random plotly colors, because they going crazy.
+    for it in range(0, len(scatter_side.data)):
+        if scatter_side.data[it]['customdata'][0][0]:
+            scatter_side.data[it]['marker']['color'] = "#DC143C"
+        else:
+            pass
+            scatter_side.data[it]['marker']['color'] = "#636efa"
+
+    return scatter_side
 
 @app.callback(
     Output('legend_selection', 'data'),

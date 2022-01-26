@@ -5,7 +5,7 @@ from dash import dcc, html, dash_table
 
 
 class Layout:
-    def get_layout(self, dropdowns, scatter_test, my_dataset):
+    def get_layout(self, dropdowns, my_dataset):
         """
         Builds an returns a layout
         :param dropdowns: Dropdown options for dataset selection
@@ -177,7 +177,6 @@ class Layout:
                                 dbc.Row([
                                     dbc.Col([
                                         dcc.Graph(id='scatter_matrix',
-                                                  figure=scatter_test,
                                                   responsive=True),
                                     ])
                                 ]),
