@@ -10,6 +10,7 @@ import pandas as pd
 from utility import data_io as milts_files
 from utility import dataset as ds
 import required_functionalities as rf
+import json
 
 """
 DIRECTORY FORMAT:
@@ -54,7 +55,8 @@ recent_click_data = None
 last_selection = None
 
 # Init app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
+                                                dbc.icons.FONT_AWESOME])
 app.title = "MILTS"
 
 my_layout = layout.Layout()
@@ -90,14 +92,19 @@ def print_seq_data(hover_data, search_data):
 @app.callback(
     Output('table_selection', 'data'),
     Output('textarea-taxon', 'value'),
+    Output('table_selection', 'columns'),
+    Output('table_all', 'columns'),
+    Output('legend_selection', 'columns'),
     Input('scatter3d', 'clickData'),
     Input('table_selection', 'active_cell'),
     Input('table_all', 'active_cell'),
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
-    Input('button_add_legend_to_select','n_clicks')
+    Input('button_add_legend_to_select', 'n_clicks'),
+    Input('variable-selection', 'value')
 )
-def select(click_data, selection_table_cell, all_table_cell, search_data, button_reset,button_add_legend_to_select):
+def select(click_data, selection_table_cell, all_table_cell, search_data,
+           button_reset, button_add_legend_to_select, selected_vars):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -120,7 +127,10 @@ def select(click_data, selection_table_cell, all_table_cell, search_data, button
     # input from table of selected genes
     if selection_table_cell:
         try:
-            cell = my_dataset.get_selected_data().iloc[selection_table_cell['row']]['g_name']
+            cell = \
+                my_dataset.get_selected_data().iloc[
+                    selection_table_cell['row']][
+                    'g_name']
             if cell != last_selection:
                 my_point = cell
         except IndexError:
@@ -168,8 +178,25 @@ def select(click_data, selection_table_cell, all_table_cell, search_data, button
         for i in genes_list:
             my_dataset.select(i)
 
-    return my_dataset.get_selected_data().to_dict('records'),\
-           output_text
+    # select table columns
+    columns = []
+
+    # pull variable description from glossary
+    with open("./static/glossary.json") as f:
+        glossary = json.load(f)
+
+    # if selection has changed : build new column lis
+    if selected_vars:
+        for variable in selected_vars:
+            # substitute non-internal name if possible
+            if str(variable) in glossary:
+                var_name = glossary[str(variable)]['short']
+                columns.append({"name": var_name, "id": variable})
+            else:
+                columns.append({"name": variable, "id": variable})
+
+    return my_dataset.get_selected_data().to_dict('records'), \
+           output_text, columns, columns, columns
 
 
 @app.callback(
@@ -260,7 +287,8 @@ def update_dataframe(value, new_path):
                                      custom_data=['g_name'])
 
     # contribution of variables
-    contribution_data = pd.read_csv(new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
+    contribution_data = pd.read_csv(
+        new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
     contribution_fig = px.scatter(contribution_data,
                                   title="Contribution of variables",
                                   x="PC1", y="PC2",
@@ -269,7 +297,8 @@ def update_dataframe(value, new_path):
     contribution_fig.update_traces(textposition='top center')
 
     # scree plot
-    pca_data = pd.read_csv(new_path + "PCA_and_clustering\PCA_results\pca_summary.csv")
+    pca_data = pd.read_csv(
+        new_path + "PCA_and_clustering\PCA_results\pca_summary.csv")
     pca_resolution = 5
     proportion_of_variance = []
     pca_ids = []

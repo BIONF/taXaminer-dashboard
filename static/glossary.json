@@ -1,0 +1,10 @@
+{
+  "g_name": {
+    "short": "Gene Name",
+    "details": "..."
+  },
+  "c_name": {
+    "short": "contig name",
+    "details": "..."
+  }
+}
