@@ -224,10 +224,19 @@ class Layout:
                                         className="d-flex m-2 radio-group"
                                                   " btn-block"
                                     ),
-                                ]),
+                                ], width=3),
                                 dbc.Col([
                                     dbc.Row([
                                         dbc.ButtonGroup([
+                                            dbc.Button([
+                                                html.Span(
+                                                    ["", html.I(
+                                                        className="fas fa-upload"),
+                                                     html.Span(
+                                                         " Load session")])],
+                                                color="primary",
+                                                id='btn-reload'
+                                            ),
                                             dbc.Button([
                                                 html.Span(["", html.I(className="fas fa-eye"), html.Span(" Add all visible")])],
                                                 color="success",
@@ -237,14 +246,14 @@ class Layout:
                                                 html.Span(["", html.I(
                                                     className="fas fa-trash"),
                                                            html.Span(
-                                                               " Reset selection")])],
+                                                               " Reset")])],
                                                 color="danger",
                                                 id="button_reset"
                                             ),
                                             dbc.Button([
                                                 html.Span(
-                                                    ["", html.I(className="fas fa-arrow-alt-circle-down"),
-                                                     html.Span(" Download selection")])],
+                                                    ["", html.I(className="fas fa-download"),
+                                                     html.Span(" Download")])],
                                                 color="primary",
                                                 id='btn-download'
                                             ),

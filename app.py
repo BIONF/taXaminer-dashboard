@@ -101,10 +101,12 @@ def print_seq_data(hover_data, search_data):
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
-    Input('variable-selection', 'value')
+    Input('variable-selection', 'value'),
+    Input('btn-reload', 'n_clicks')
 )
 def select(click_data, selection_table_cell, all_table_cell, search_data,
-           button_reset, button_add_legend_to_select, selected_vars):
+           button_reset, button_add_legend_to_select, selected_vars,
+           reload):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -165,6 +167,10 @@ def select(click_data, selection_table_cell, all_table_cell, search_data,
     last_selection = my_point
     if changed_id == 'button_reset.n_clicks':
         my_dataset.reset_selection()
+
+    # Load save
+    if changed_id == 'btn-reload.n_clicks':
+        raise NotImplementedError("Cookies not yet implemented!")
 
     # add visible taxa to selection
     if changed_id == 'button_add_legend_to_select.n_clicks':
