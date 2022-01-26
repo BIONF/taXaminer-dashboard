@@ -41,6 +41,11 @@ class DataSet:
         return plot_data
 
     def selected_merge(self, data=None):
+        """
+         Get a pandas dataframe of currently 'selected' column.
+        :param data: A pandas dataframe to use.
+        :return: Complete and supplemented  pandas dataframe.
+        """
         if data is None:
             data = self.original_data
 
@@ -56,7 +61,8 @@ class DataSet:
     def get_selected_data(self, data=None):
         """
         Get a pandas dataframe of currently selected rows
-        :return: filtered pandas dataframe
+        :param data: A pandas dataframe to use.
+        :return: Filtered pandas dataframe.
         """
         if data is None:
             data = self.original_data
@@ -70,8 +76,9 @@ class DataSet:
 
     def get_unselected_data(self, data=None):
         """
-        Get a pandas dataframe of currently not selected rows
-        :return: filtered pandas dataframe
+        Get a pandas dataframe of currently not selected rows.
+        :param data: A pandas dataframe to use.
+        :return: Filtered pandas dataframe.
         """
         if data is None:
             data = self.original_data
