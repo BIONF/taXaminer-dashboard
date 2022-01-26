@@ -23,7 +23,9 @@ class Layout:
         variables = my_dataset.get_data_original().columns.values.tolist()
         for variable in variables:
             if str(variable) in glossary:
-                variable_items.append({"label": glossary[str(variable)]['short'],"value": str(variable)})
+                variable_items.append({"label": glossary[str(variable)]['short'],
+                                       "value": str(variable),
+                                       "title": glossary[str(variable)]['details']})
             else:
                 variable_items.append(
                     {"label": str(variable), "value": str(variable)})
