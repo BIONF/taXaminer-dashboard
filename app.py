@@ -50,7 +50,7 @@ hover_data = ['plot_label', 'g_name', 'bh_evalue',
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
-recent_select_data = None                       # TODO
+recent_select_data = None
 last_selection = None
 
 # Init app
@@ -303,7 +303,7 @@ def update_dataframe(value, new_path):
 
     # contribution of variables
     contribution_data = pd.read_csv(
-        new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
+        new_path + "PCA_and_clustering/PCA_results/pca_loadings.csv")
     contribution_fig = px.scatter(contribution_data,
                                   title="Contribution of variables",
                                   x="PC1", y="PC2",
@@ -313,7 +313,7 @@ def update_dataframe(value, new_path):
 
     # scree plot
     pca_data = pd.read_csv(
-        new_path + "PCA_and_clustering\PCA_results\pca_summary.csv")
+        new_path + "PCA_and_clustering/PCA_results/pca_summary.csv")
     pca_resolution = 5
     proportion_of_variance = []
     pca_ids = []
