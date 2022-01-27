@@ -236,7 +236,8 @@ class Layout:
                                                      html.Span(
                                                          " Load session")])],
                                                 color="primary",
-                                                id='btn-reload'
+                                                id='btn-reload',
+                                                n_clicks=0
                                             ),
                                             dbc.Button([
                                                 html.Span(["", html.I(className="fas fa-eye"), html.Span(" Add all visible")])],

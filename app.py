@@ -12,6 +12,7 @@ from utility import data_io as milts_files
 from utility import dataset as ds
 import required_functionalities as rf
 import json
+import flask
 
 """
 DIRECTORY FORMAT:
@@ -33,7 +34,6 @@ for file in os.listdir(base_path):
         datasets.append(d + "/")
         dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
 print("Datasets", datasets)
-
 my_dataset = ds.DataSet(datasets[0])
 path = datasets[0]
 
@@ -132,7 +132,6 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
             else:
                 my_dataset.select(it['customdata'][1])
 
-
     # plot click
     if click_data and click_data != recent_click_data:
         my_point = click_data['points'][0]['customdata'][1]
@@ -180,10 +179,6 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
     if changed_id == 'button_reset.n_clicks':
         my_dataset.reset_selection()
 
-    # Load save
-    if changed_id == 'btn-reload.n_clicks':
-        raise NotImplementedError("Cookies not yet implemented!")
-
     # add visible taxa to selection
     if changed_id == 'button_add_legend_to_select.n_clicks':
         new_data = my_dataset.get_data_original().copy(deep=True)
@@ -203,7 +198,7 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
     with open("./static/glossary.json") as f:
         glossary = json.load(f)
 
-    # if selection has changed : build new column lis
+    # if selection has changed : build new column list
     if selected_vars:
         for variable in selected_vars:
             # substitute non-internal name if possible
@@ -212,6 +207,25 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
                 columns.append({"name": var_name, "id": variable})
             else:
                 columns.append({"name": variable, "id": variable})
+
+    # load save
+    if changed_id == 'btn-reload.n_clicks':
+        file_path = path + "savefile.txt"
+        save_file = open(file_path, 'r')
+        content = save_file.read()
+        line_list = content.split("||")
+        for i in range(len(line_list)):
+            my_dataset.select(line_list[i])
+
+    # create savefile
+    if click_data:
+        file_path = path + "savefile.txt"
+        save_file = open(file_path, 'w+')
+        set_data = my_dataset.selection_keys
+        list_data = list(set_data)
+
+        for gene in range(len(list_data)):
+            save_file.write(list_data[gene] + "||")
 
     return my_dataset.get_selected_data().to_dict('records'), \
            output_text, columns, columns, columns
