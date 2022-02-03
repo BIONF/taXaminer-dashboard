@@ -94,6 +94,7 @@ def print_seq_data(hover_data, search_data):
     Output('table_selection', 'columns'),
     Output('table_all', 'columns'),
     Output('legend_selection', 'columns'),
+    Output('table_selection', 'active_cell'),
     Input('scatter3d', 'clickData'),
     Input('scatter_matrix', 'selectedData'),
     Input('table_selection', 'active_cell'),
@@ -228,7 +229,7 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
             save_file.write(list_data[gene] + "||")
 
     return my_dataset.get_selected_data().to_dict('records'), \
-           output_text, columns, columns, columns
+           output_text, columns, columns, columns, None
 
 
 @app.callback(
@@ -270,7 +271,6 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('scatter3d', 'figure'),
     Output('table_all', 'data'),
     Output('summary', 'value'),
-    Output('table_selection', 'active_cell'),
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
     Input('evalue-slider', 'value'),
@@ -353,7 +353,7 @@ def update_dataframe(value, new_path):
 
     # update reference path
     path = new_path
-    return my_fig, data.to_dict('records'), summary, None, contribution_fig, scree_fig
+    return my_fig, data.to_dict('records'), summary, contribution_fig, scree_fig
 
 @app.callback(
     Output('scatter_matrix', 'figure'),
