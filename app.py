@@ -6,13 +6,12 @@ import layout
 from dash import callback_context, dcc
 from dash.dependencies import Input, Output
 import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 from utility import data_io as milts_files
 from utility import dataset as ds
 import required_functionalities as rf
 import json
-import flask
+
 
 """
 DIRECTORY FORMAT:
@@ -43,6 +42,11 @@ list_of_labels = my_dataset.get_data_original()['plot_label'].tolist()
 label_dictionary = dict.fromkeys(list_of_labels, True)
 del label_dictionary['Unassigned']
 legend_order = list(label_dictionary.keys())
+
+
+# load glossary once
+with open("./static/glossary.json") as f:
+    glossary = json.load(f)
 
 # Global Settings
 hover_data = ['plot_label', 'g_name', 'bh_evalue',
@@ -89,11 +93,36 @@ def print_seq_data(hover_data, search_data):
 
 
 @app.callback(
+    Output('table_all', 'columns'),
+    Output('table_selection', 'columns'),
+    Output('legend_selection', 'columns'),
+    Input('variable-selection', 'value'),
+)
+def update_table_columns(selected_vars):
+    """
+    Updated the table columns based on user selection
+    :param selected_vars: list of selected variable names
+    :return: list of tuples defining the table columns
+    """
+    # select table columns
+    columns = []
+
+    # if selection has changed : build new column list
+    if selected_vars:
+        for variable in selected_vars:
+            # substitute non-internal name if possible
+            if str(variable) in glossary:
+                var_name = glossary[str(variable)]['short']
+                columns.append({"name": var_name, "id": variable})
+            else:
+                columns.append({"name": variable, "id": variable})
+
+    return columns, columns, columns
+
+
+@app.callback(
     Output('table_selection', 'data'),
     Output('textarea-taxon', 'value'),
-    Output('table_selection', 'columns'),
-    Output('table_all', 'columns'),
-    Output('legend_selection', 'columns'),
     Output('table_selection', 'active_cell'),
     Input('scatter3d', 'clickData'),
     Input('scatter_matrix', 'selectedData'),
@@ -102,12 +131,10 @@ def print_seq_data(hover_data, search_data):
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
-    Input('variable-selection', 'value'),
     Input('btn-reload', 'n_clicks')
 )
-def select(click_data, select_data, selection_table_cell, all_table_cell, search_data,
-           button_reset, button_add_legend_to_select, selected_vars,
-           reload):
+def select(click_data, select_data, selection_table_cell, all_table_cell,
+           search_data, button_reset, button_add_legend_to_select, reload):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -117,10 +144,12 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
     :param search_data: value of the searchbar
     :return: updated content for textareas and tables
     """
+
     my_point = ""
     global recent_click_data
     global recent_select_data
     global last_selection
+    global glossary
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     # scatter matrix select
@@ -192,23 +221,6 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
         for i in genes_list:
             my_dataset.select(i)
 
-    # select table columns
-    columns = []
-
-    # pull variable description from glossary
-    with open("./static/glossary.json") as f:
-        glossary = json.load(f)
-
-    # if selection has changed : build new column list
-    if selected_vars:
-        for variable in selected_vars:
-            # substitute non-internal name if possible
-            if str(variable) in glossary:
-                var_name = glossary[str(variable)]['short']
-                columns.append({"name": var_name, "id": variable})
-            else:
-                columns.append({"name": variable, "id": variable})
-
     # load save
     if changed_id == 'btn-reload.n_clicks':
         file_path = path + "savefile.txt"
@@ -228,8 +240,7 @@ def select(click_data, select_data, selection_table_cell, all_table_cell, search
         for gene in range(len(list_data)):
             save_file.write(list_data[gene] + "||")
 
-    return my_dataset.get_selected_data().to_dict('records'), \
-           output_text, columns, columns, columns, None
+    return my_dataset.get_selected_data().to_dict('records'), output_text, None
 
 
 @app.callback(
@@ -301,6 +312,7 @@ def update_dataframe(value, new_path):
     # e-value filter
     value = 1 * math.e ** (-value)
     my_data = my_dataset.get_plot_data({'e-value': value})
+
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
                            color='plot_label', hover_data=hover_data,
                            custom_data=['taxa_color', 'g_name', 'best_hit'])
@@ -355,6 +367,7 @@ def update_dataframe(value, new_path):
     path = new_path
     return my_fig, data.to_dict('records'), summary, contribution_fig, scree_fig
 
+
 @app.callback(
     Output('scatter_matrix', 'figure'),
     Input('evalue-slider', 'value'),
@@ -390,6 +403,7 @@ def updateScatterMatrix(value, scat_3d, legend):
             scatter_side.data[it]['marker']['color'] = "#636efa"
 
     return scatter_side
+
 
 @app.callback(
     Output('legend_selection', 'data'),
