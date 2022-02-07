@@ -93,20 +93,24 @@ def print_seq_data(hover_data, search_data):
 
 
 @app.callback(
-    Output('table_all', 'columns'),
     Output('table_selection', 'columns'),
     Output('legend_selection', 'columns'),
     Input('variable-selection', 'value'),
+    Input('table_selection', 'columns'),
+    Input('legend_selection', 'columns'),
+    prevent_initial_call=True
 )
-def update_table_columns(selected_vars):
+def update_table_columns(selected_vars, sel_cols, legend_cols):
     """
-    Updated the table columns based on user selection
-    :param selected_vars: list of selected variable names
-    :return: list of tuples defining the table columns
+    Update the column visible in all tabels
+    :param selected_vars: selection of dataframe columns to be shown
+    :param sel_cols: current cols of 'selected' table
+    :param legend_cols: current cols of 'legend'
+    :return: columns as list
     """
+
     # select table columns
     columns = []
-
     # if selection has changed : build new column list
     if selected_vars:
         for variable in selected_vars:
@@ -116,8 +120,8 @@ def update_table_columns(selected_vars):
                 columns.append({"name": var_name, "id": variable})
             else:
                 columns.append({"name": variable, "id": variable})
-
-    return columns, columns, columns
+        sel_cols = legend_cols = columns
+    return sel_cols, legend_cols
 
 
 @app.callback(
@@ -127,20 +131,18 @@ def update_table_columns(selected_vars):
     Input('scatter3d', 'clickData'),
     Input('scatter_matrix', 'selectedData'),
     Input('table_selection', 'active_cell'),
-    Input('table_all', 'active_cell'),
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks')
 )
-def select(click_data, select_data, selection_table_cell, all_table_cell,
-           search_data, button_reset, button_add_legend_to_select, reload):
+def select(click_data, select_data, selection_table_cell, search_data,
+           button_reset, button_add_legend_to_select, reload):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
     :param select_data: select data from scatter matrix
     :param selection_table_cell: cell index from table of selected sequences
-    :param all_table_cell: cell index from all table
     :param search_data: value of the searchbar
     :return: updated content for textareas and tables
     """
@@ -280,7 +282,6 @@ def update_selection_mode(button_add, button_remove, button_neutral):
 
 @app.callback(
     Output('scatter3d', 'figure'),
-    Output('table_all', 'data'),
     Output('summary', 'value'),
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
@@ -365,7 +366,7 @@ def update_dataframe(value, new_path):
 
     # update reference path
     path = new_path
-    return my_fig, data.to_dict('records'), summary, contribution_fig, scree_fig
+    return my_fig, summary, contribution_fig, scree_fig
 
 
 @app.callback(
@@ -407,13 +408,22 @@ def updateScatterMatrix(value, scat_3d, legend):
 
 @app.callback(
     Output('legend_selection', 'data'),
-    Input('scatter3d', 'restyleData'))
-def display_click_data(selectedData):
+    Input('scatter3d', 'restyleData'),
+    Input('btn-sync', 'n_clicks'),
+    Input('legend_selection', 'data')
+)
+def display_click_data(selectedData, n_clicks, curr_data):
     """
     function to update the table with the Taxa visble in plot
     :param selectedData:
     :return: updated dataset to build the table new according to the visible parts of the legend
     """
+
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    if changed_id != 'btn-sync.n_clicks':
+        return curr_data
+
     # removing error at the start of the program
     if selectedData is None:
         return my_dataset.get_data_original().to_dict('records')
