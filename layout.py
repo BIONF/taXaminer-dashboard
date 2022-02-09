@@ -22,12 +22,16 @@ class Layout:
         variables = my_dataset.get_data_original().columns.values.tolist()
         for variable in variables:
             if str(variable) in glossary:
-                variable_items.append({"label": glossary[str(variable)]['short'],
-                                       "value": str(variable),
-                                       "title": glossary[str(variable)]['details']})
+                variable_items.append(
+                    {"label": glossary[str(variable)]['short'],
+                     "value": str(variable),
+                     "title": glossary[str(variable)]['details']})
             else:
                 variable_items.append(
                     {"label": str(variable), "value": str(variable)})
+
+        # colorscales
+        colorscales = [{'label': "Rainbow", 'value': 'rainbow'}]
 
         layout = dbc.Container(fluid=True, children=[
             dbc.NavbarSimple(
@@ -128,12 +132,6 @@ class Layout:
                                                  className="m-1 form-switch"),
                                     dbc.Checkbox(label="e-value",
                                                  className="m-1 form-switch"),
-                                    dbc.Checkbox(label="Ignore unassigned",
-                                                 className="m-1 form-switch"),
-                                    dbc.Checkbox(label="Ignore non-coding",
-                                                 className="m-1 form-switch"),
-                                    dbc.Checkbox(label="Filter by scaffolds",
-                                                 className="m-1 form-switch"),
                                 ], className="m-2"),
                                 dbc.Card([
                                     dbc.CardHeader("e-value Filter"),
@@ -186,6 +184,30 @@ class Layout:
                     ]),
                 ]
             ),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Row([
+                        # Dot size selection
+                        dbc.Col([
+                            html.Span("Dot size (px)"),
+                            dcc.Slider(0, 20, 5,
+                                       value=10,
+                                       id='dot-size'
+                                       ),
+                        ]),
+                        # colorscale selection
+                        dbc.Col([
+                            html.Span("Colorscale"),
+                            dcc.Dropdown(
+                                id='colorscale-select',
+                                options=colorscales,
+                                value=colorscales[0].get(
+                                    'value')
+                            )
+                        ]),
+                    ]),
+                ], width=8),
+            ]),
             html.Hr(),
             dbc.NavbarSimple(
                 brand="Data Selection",
@@ -239,7 +261,10 @@ class Layout:
                                                 n_clicks=0
                                             ),
                                             dbc.Button([
-                                                html.Span(["", html.I(className="fas fa-eye"), html.Span(" Add all visible")])],
+                                                html.Span(["", html.I(
+                                                    className="fas fa-eye"),
+                                                           html.Span(
+                                                               " Add all visible")])],
                                                 color="success",
                                                 id="button_add_legend_to_select",
                                             ),
@@ -253,7 +278,8 @@ class Layout:
                                             ),
                                             dbc.Button([
                                                 html.Span(
-                                                    ["", html.I(className="fas fa-download"),
+                                                    ["", html.I(
+                                                        className="fas fa-download"),
                                                      html.Span(" Download")])],
                                                 color="primary",
                                                 id='btn-download'
