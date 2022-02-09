@@ -1,5 +1,4 @@
 import json
-
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table
 
@@ -294,28 +293,22 @@ class Layout:
                                         'records'),
                                 ),
                             ], className="d-flex m-2"),
-                        ], label="Download Selection"),
+                        ], label="Selection Tools"),
 
                         dbc.Tab([
                             dbc.Card([
-                                # table containing all assignments
-                                dash_table.DataTable(
-                                    id='table_all',
-                                    columns=[{"name": "Gene Name",
-                                              "id": "g_name"},
-                                             {"name": "Best Hit",
-                                              "id": "best_hit"},
-                                             {"name": "e-value",
-                                              "id": "bh_evalue"}],
-                                    data=my_dataset.get_data_original().to_dict(
-                                        'records'),
-                                    sort_action='native',
-                                    sort_mode='multi',
-                                ),
-                            ], className="m-2"),
-                        ], label="Full Dataset"),
-
-                        dbc.Tab([
+                                # sync button
+                                dbc.Button(
+                                    html.Span(
+                                        ["",
+                                         html.I(className="fas fa-arrow-down"),
+                                         html.Span(" Sync table with graph "),
+                                         html.I(className="fas fa-arrow-down")
+                                         ]),
+                                    color="success",
+                                    size="md",
+                                    id="btn-sync"),
+                            ]),
                             dbc.Card([
                                 # table containing only selected taxa
                                 dash_table.DataTable(
@@ -332,8 +325,8 @@ class Layout:
                                     sort_mode='multi',
                                 ),
                             ], className="m-2"),
-                        ], label="Taxa visible in plot"),
-                    ]),
+                        ], label="Plot Table"),
+                    ], id="table-tabs"),
                 ]),
                 dbc.Col([
                     dbc.Tabs([

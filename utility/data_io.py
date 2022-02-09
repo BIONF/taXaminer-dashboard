@@ -9,10 +9,13 @@ def get_protein_record(g_name, path):
     :param path: path to dataset
     :return: SeqIO.record
     """
-    with open(path + "/proteins.faa") as handle:
-        for record in SeqIO.parse(handle, "fasta"):
-            if record.name == "gene-" + g_name:
-                return record
+    try:
+        with open(path + "/proteins.faa") as handle:
+            for record in SeqIO.parse(handle, "fasta"):
+                if record.name == "gene-" + g_name:
+                    return record
+    except FileNotFoundError:
+        return None
 
 
 def write_protein_sequences(genes, path):
