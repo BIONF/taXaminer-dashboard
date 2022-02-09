@@ -2,17 +2,17 @@ from Bio import SeqIO
 import os
 
 
-def get_protein_record(g_name, path):
+def get_protein_record(prot_id, path):
     """
     Get a protein record based on key
-    :param g_name: gene Nominator
+    :param prot_id: protein ID as used in proteins.faa
     :param path: path to dataset
     :return: SeqIO.record
     """
     try:
         with open(path + "/proteins.faa") as handle:
             for record in SeqIO.parse(handle, "fasta"):
-                if record.name == "gene-" + g_name:
+                if record.name == prot_id:
                     return record
     except FileNotFoundError:
         return None
@@ -26,10 +26,6 @@ def write_protein_sequences(genes, path):
     :return:filesystem path to new file
     """
     as_sequences = []
-
-    genes = list(genes)
-    for i, gene in enumerate(genes):
-        genes[i] = "gene-" + gene
 
     with open(path + "/proteins.faa") as handle:
         for record in SeqIO.parse(handle, "fasta"):
