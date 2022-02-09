@@ -167,9 +167,15 @@ class Layout:
                                             dcc.Graph(
                                                 id="contribution"
                                             ),
+
                                             dcc.Graph(
-                                                id="scree"
+
+                                                id="scree",
+                                                
+                                            
                                             )
+
+
                                         ])
                                     ])
                                 ]),
@@ -180,6 +186,7 @@ class Layout:
                                     dbc.Col([
                                         dcc.Graph(id='scatter_matrix',
                                                   responsive=True),
+
                                     ])
                                 ]),
                             ]),

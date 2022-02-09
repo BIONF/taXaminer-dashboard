@@ -315,15 +315,76 @@ def update_dataframe(value, new_path):
 
     # scatter_side is outsourced to update_scatter_matrix()
 
+    # pull variable description from glossary
+    with open("./static/glossary.json") as f:
+        glossary = json.load(f)
+
     # contribution of variables
     contribution_data = pd.read_csv(
-        new_path + "PCA_and_clustering/PCA_results/pca_loadings.csv")
-    contribution_fig = px.scatter(contribution_data,
+        new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
+    labels_pca = list(contribution_data.iloc[:,0])
+
+    details_list = []
+    for i in labels_pca:
+        if i in glossary:
+            labels_pca[labels_pca.index(i)] = glossary[i]['short']
+            details_list.append(glossary[i]["details"])
+        else:
+            details_list.append("")
+
+
+
+    contribution_fig = px.scatter_3d(contribution_data,
                                   title="Contribution of variables",
-                                  x="PC1", y="PC2",
-                                  text="Unnamed: 0",
-                                  range_x=[-1, 1], range_y=[-1, 1])
+                                  x="PC1", y="PC2", z="PC3",
+                                  #text="Unnamed: 0",
+                                  range_x=[-1, 1], range_y=[-1, 1], range_z=[1,1],
+                                  color=labels_pca,
+                                  hover_data=[details_list]
+
+                                  )
+
+
+    """
+    # loop to add arrows in to the graph for visibility
+    for index, i in contribution_data.iterrows():
+        if i['Unnamed: 0'] in glossary:
+            var_name = glossary[i['Unnamed: 0']]['short']
+
+        else:
+            var_name = i['Unnamed: 0']
+
+        contribution_fig.add_annotation(
+            x=i['PC1'],  # arrows' head
+            y=i['PC2'],  # arrows' head
+            z=i['PC3'],
+            ax=0,  # arrows' tail
+            ay=0,  # arrows' tail
+            az=0,
+            xref='x',
+            yref='y',
+            zref='z',
+            axref='x',
+            ayref='y',
+            azref='z',
+            text='',  # if you want only the arrow
+            showarrow=True,
+            arrowhead=3,
+            arrowsize=2,
+            arrowwidth=1,
+            arrowcolor='grey'
+        )
+        """
+    """
+    contribution_fig.add_shape(type="circle",
+    xref="x", yref="y",
+    x0=-1, y0=-1, x1=1, y1=1,
+    line_color="grey",
+    
+    )
+    """
     contribution_fig.update_traces(textposition='top center')
+
 
     # scree plot
     pca_data = pd.read_csv(
