@@ -114,3 +114,13 @@ class DataSet:
         """
         self.selection_keys = set()
 
+    def get_protID(self, gene_name):
+        """
+        Fetch the protID associated with a given g_name
+        :param gene_name:
+        :return:
+        """
+        original_data = self.original_data
+        my_id = original_data.loc[original_data['g_name'] == gene_name]['protID'].item()
+        return my_id
+

@@ -49,8 +49,7 @@ with open("./static/glossary.json") as f:
     glossary = json.load(f)
 
 # Global Settings
-hover_data = ['plot_label', 'g_name', 'bh_evalue',
-              'best_hit', 'taxon_assignment']
+hover_data = ['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment']
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
@@ -83,7 +82,8 @@ def print_seq_data(hover_data, search_data):
     if search_data:
         my_dot = search_data
     else:
-        my_dot = hover_data['points'][0]['customdata'][1]
+        # fetch protID from hover data
+        my_dot = hover_data['points'][0]['customdata'][3]
     global path
     seq = milts_files.get_protein_record(my_dot, path)
     if not seq:
@@ -316,11 +316,12 @@ def update_dataframe(value, new_path):
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
                            color='plot_label', hover_data=hover_data,
-                           custom_data=['taxa_color', 'g_name', 'best_hit'])
+                           custom_data=['taxa_color', 'g_name', 'best_hit',
+                                        'protID'])
 
     my_fig.update_traces(marker=dict(size=3))
     my_fig.update_traces(
-        hovertemplate=rf.createHovertemplate(hover_data, 2, 1))
+        hovertemplate=rf.createHovertemplate(hover_data, 2, 2))
     rf.SetCustomColorTraces(my_fig, 0)
 
     my_fig.update_layout(legend=dict(title=dict(text='Taxa'),
@@ -477,7 +478,16 @@ def download(click_data):
     :param click_data: data from the corresponding button
     :return: dcc.send_file
     """
-    link = milts_files.write_protein_sequences(my_dataset.selection_keys, path)
+    prot_ids = []
+    key_list = list(my_dataset.selection_keys)
+
+    # empty set
+    key_list.remove('')
+
+    # replace by protIDs
+    for key in key_list:
+        prot_ids.append(my_dataset.get_protID(key))
+    link = milts_files.write_protein_sequences(prot_ids, path)
     return dcc.send_file(link)
 
 
