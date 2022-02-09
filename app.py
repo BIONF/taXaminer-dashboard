@@ -374,7 +374,7 @@ def update_dataframe(value, new_path):
     Output('scatter_matrix', 'figure'),
     Input('evalue-slider', 'value'),
     Input('scatter3d', 'figure'),
-    Input('legend_selection', 'columns')
+    Input('legend_selection', 'data')
 )
 def updateScatterMatrix(value, scat_3d, legend):
     """
