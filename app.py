@@ -17,7 +17,6 @@ import json
 
 import plotly.graph_objs as go
 
-
 """
 DIRECTORY FORMAT:
 ./data/<name of MILTS run>/gene_info
@@ -41,20 +40,19 @@ print("Datasets", datasets)
 my_dataset = ds.DataSet(datasets[0])
 path = datasets[0]
 
-
 # creating a dictionary of the legend. Values indicate the visibility
 list_of_labels = my_dataset.get_data_original()['plot_label'].tolist()
 label_dictionary = dict.fromkeys(list_of_labels, True)
 del label_dictionary['Unassigned']
 legend_order = list(label_dictionary.keys())
 
-
 # load glossary once
 with open("./static/glossary.json") as f:
     glossary = json.load(f)
 
 # Global Settings
-hover_data = ['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment']
+hover_data = ['plot_label', 'g_name', 'best_hit', 'bh_evalue',
+              'taxon_assignment']
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
@@ -332,17 +330,12 @@ def update_dataframe(value, new_path):
     my_fig.update_layout(legend=dict(title=dict(text='Taxa'),
                                      itemsizing='constant'))
 
-    # scatter_side is outsourced to update_scatter_matrix()
-
-    # pull variable description from glossary
-    with open("./static/glossary.json") as f:
-        glossary = json.load(f)
-
     # contribution of variables
     contribution_data = pd.read_csv(
         new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
     labels_pca = list(contribution_data.iloc[:, 0])
 
+    # PCA plot
     details_list = []
     for i in labels_pca:
         if i in glossary:
@@ -351,65 +344,54 @@ def update_dataframe(value, new_path):
         else:
             details_list.append("")
 
-    PC1_data = contribution_data.get("PC1")
-    PC2_data = contribution_data.get("PC2")
-    PC3_data = contribution_data.get("PC3")
+    pc1_data = contribution_data.get("PC1")
+    pc2_data = contribution_data.get("PC2")
+    pc3_data = contribution_data.get("PC3")
 
     contribution_fig = px.scatter_3d(contribution_data,
-                                  title="Contribution of variables",
-                                  x="PC1", y="PC2", z="PC3",
-                                  range_x=[-1, 1], range_y=[-1, 1], range_z=[-1,1],
-                                  color=labels_pca,
-                                  hover_data=[details_list],
-
-                                  )
-
-    # sync camera angles
-    """
-    camera = dict(
-        eye=dict(x=1.25, y=1.25, z=1.25)
-    )
-
-    if  my_fig.layout.scene1.camera.eye.x == None:
-        my_fig.update_layout(scene_camera=camera)
-
-    new_x = my_fig.layout.scene1.camera.eye.x
-    new_y = my_fig.layout.scene1.camera.eye.y
-    new_z = my_fig.layout.scene1.camera.eye.z
-    print(new_x, new_y, new_z)
-    #print(test_variable)
-    """
+                                     title="Contribution of variables",
+                                     x="PC1", y="PC2", z="PC3",
+                                     range_x=[-1, 1], range_y=[-1, 1],
+                                     range_z=[-1, 1],
+                                     color=labels_pca,
+                                     hover_data=[details_list],
+                                     height=520)
 
     # get points
-    point_listx = []
-    point_listy = []
-    point_listz = []
+    point_list_x = []
+    point_list_y = []
+    point_list_z = []
     for x in range(11):
-        point_listx.append(PC1_data[x])
-        point_listy.append(PC2_data[x])
-        point_listz.append(PC3_data[x])
+        point_list_x.append(pc1_data[x])
+        point_list_y.append(pc2_data[x])
+        point_list_z.append(pc3_data[x])
 
     # calc x,y,z
-    vector_listx = []
-    vector_listy = []
-    vector_listz = []
+    vector_list_x = []
+    vector_list_y = []
+    vector_list_z = []
     for i in range(11):
-        vector_listx.append(0)
-        vector_listx.append(point_listx[i])
-
-        vector_listy.append(0)
-        vector_listy.append(point_listy[i])
-
-        vector_listz.append(0)
-        vector_listz.append(point_listz[i])
+        vector_list_x.append(0)
+        vector_list_x.append(point_list_x[i])
+        vector_list_y.append(0)
+        vector_list_y.append(point_list_y[i])
+        vector_list_z.append(0)
+        vector_list_z.append(point_list_z[i])
 
     # update Scatter
     contribution_fig.add_traces(go.Scatter3d(name="Arrows", mode="lines",
-                                x=vector_listx,
-                                y=vector_listy,
-                                z=vector_listz, showlegend=True, hoverinfo='skip'))
+                                             x=vector_list_x,
+                                             y=vector_list_y,
+                                             z=vector_list_z,
+                                             showlegend=True,
+                                             hoverinfo='skip'))
 
-    contribution_fig.update_traces(textposition='top center', marker_size=5,  hovertemplate=None)
+    contribution_fig.update_traces(textposition='top center',
+                                   marker_size=5,
+                                   hovertemplate=None)
+    # legend
+    contribution_fig.update_layout(legend=dict(orientation="h",
+                                               itemsizing='constant'))
 
     # scree plot
     pca_data = pd.read_csv(
@@ -425,7 +407,7 @@ def update_dataframe(value, new_path):
     pca_data = pd.DataFrame(proportion_of_variance, pca_ids)
     scree_fig = px.bar(pca_data,
                        title="Scree Plot",
-                       height=350)
+                       height=300)
     scree_fig.update_layout(yaxis_title="Contribution to total variance",
                             showlegend=False)
 
@@ -464,9 +446,10 @@ def updateScatterMatrix(value, scat_3d, legend):
                                      color='selected',
                                      custom_data=['selected', 'g_name'])
 
-    scatter_side.update_traces(hovertemplate='%{customdata[1]}<br>%{xaxis.title.text}=%{x}<br>%{yaxis.title.text}=%{'
-                                             'y}<extra></extra>',
-                               showlegend=False)
+    scatter_side.update_traces(
+        hovertemplate='%{customdata[1]}<br>%{xaxis.title.text}=%{x}<br>%{yaxis.title.text}=%{'
+                      'y}<extra></extra>',
+        showlegend=False)
 
     # Override random plotly colors, because they going crazy.
     for it in range(0, len(scatter_side.data)):

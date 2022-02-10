@@ -162,17 +162,11 @@ class Layout:
                                         dbc.Card([
                                             dbc.CardHeader("PCA Data"),
                                             dcc.Graph(
-                                                id="contribution"
+                                                id="contribution",
                                             ),
-
                                             dcc.Graph(
-
                                                 id="scree",
-                                                
-                                            
                                             )
-
-
                                         ])
                                     ])
                                 ]),
