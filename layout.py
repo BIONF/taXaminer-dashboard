@@ -127,6 +127,15 @@ class Layout:
                                     ], className="m-2"),
                             dbc.Tab([
                                 dbc.Card([
+                                    dbc.CardHeader("Diamond Output"),
+                                    dash_table.DataTable(id='table-hits',
+                                                         page_size=25,
+                                                         style_table={'overflowX': 'auto',
+                                                                      'height': 'auto'})
+                                ], className="m-2"),
+                            ], label="Diamond Output"),
+                            dbc.Tab([
+                                dbc.Card([
                                     dbc.CardHeader("Enable/Disable Filters"),
                                     dbc.Checkbox(label="Scatterplot legend",
                                                  className="m-1 form-switch"),

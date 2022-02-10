@@ -128,13 +128,14 @@ def update_table_columns(selected_vars, sel_cols, legend_cols):
     Output('table_selection', 'data'),
     Output('textarea-taxon', 'value'),
     Output('table_selection', 'active_cell'),
+    Output('table-hits', 'data'),
     Input('scatter3d', 'clickData'),
     Input('scatter_matrix', 'selectedData'),
     Input('table_selection', 'active_cell'),
     Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
-    Input('btn-reload', 'n_clicks')
+    Input('btn-reload', 'n_clicks'),
 )
 def select(click_data, select_data, selection_table_cell, search_data,
            button_reset, button_add_legend_to_select, reload):
@@ -147,7 +148,9 @@ def select(click_data, select_data, selection_table_cell, search_data,
     :return: updated content for textareas and tables
     """
 
+    taxonomic_hits = None
     my_point = ""
+    prot_id = None
     global recent_click_data
     global recent_select_data
     global last_selection
@@ -168,6 +171,7 @@ def select(click_data, select_data, selection_table_cell, search_data,
     if click_data and click_data != recent_click_data:
         my_point = click_data['points'][0]['customdata'][1]
         recent_click_data = click_data
+        prot_id = click_data['points'][0]['customdata'][3]
 
     # input from table of selected genes
     if selection_table_cell:
@@ -178,8 +182,13 @@ def select(click_data, select_data, selection_table_cell, search_data,
                     'g_name']
             if cell != last_selection:
                 my_point = cell
+                prot_id = my_dataset.get_protID(my_point)
         except IndexError:
             pass
+
+    # taxonomic hits
+    if prot_id:
+        taxonomic_hits = my_dataset.get_taxonomic_hits(prot_id)
 
     # input from search bar
     if search_data:
@@ -242,7 +251,13 @@ def select(click_data, select_data, selection_table_cell, search_data,
         for gene in range(len(list_data)):
             save_file.write(list_data[gene] + "||")
 
-    return my_dataset.get_selected_data().to_dict('records'), output_text, None
+    # taxonomic hit table
+    if taxonomic_hits is not None:
+        # drop unsued rows
+        taxonomic_hits.drop(['qseqid', 'sseqid'], axis=1, inplace=True)
+        taxonomic_hits = taxonomic_hits.to_dict('records')
+
+    return my_dataset.get_selected_data().to_dict('records'), output_text, None, taxonomic_hits
 
 
 @app.callback(
