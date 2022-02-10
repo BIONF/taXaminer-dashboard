@@ -2,6 +2,9 @@ import os
 import dash
 import dash_bootstrap_components as dbc
 import math
+
+from dash.exceptions import PreventUpdate
+
 import layout
 from dash import callback_context, dcc
 from dash.dependencies import Input, Output
@@ -350,53 +353,32 @@ def update_dataframe(value, new_path):
     contribution_fig = px.scatter_3d(contribution_data,
                                   title="Contribution of variables",
                                   x="PC1", y="PC2", z="PC3",
-                                  #text="Unnamed: 0",
                                   range_x=[-1, 1], range_y=[-1, 1], range_z=[1,1],
                                   color=labels_pca,
-                                  hover_data=[details_list]
+                                  hover_data=[details_list],
 
                                   )
 
 
-    """
-    # loop to add arrows in to the graph for visibility
-    for index, i in contribution_data.iterrows():
-        if i['Unnamed: 0'] in glossary:
-            var_name = glossary[i['Unnamed: 0']]['short']
 
-        else:
-            var_name = i['Unnamed: 0']
-
-        contribution_fig.add_annotation(
-            x=i['PC1'],  # arrows' head
-            y=i['PC2'],  # arrows' head
-            z=i['PC3'],
-            ax=0,  # arrows' tail
-            ay=0,  # arrows' tail
-            az=0,
-            xref='x',
-            yref='y',
-            zref='z',
-            axref='x',
-            ayref='y',
-            azref='z',
-            text='',  # if you want only the arrow
-            showarrow=True,
-            arrowhead=3,
-            arrowsize=2,
-            arrowwidth=1,
-            arrowcolor='grey'
-        )
-        """
+    # sync camera angles
     """
-    contribution_fig.add_shape(type="circle",
-    xref="x", yref="y",
-    x0=-1, y0=-1, x1=1, y1=1,
-    line_color="grey",
-    
+    camera = dict(
+        eye=dict(x=1.25, y=1.25, z=1.25)
     )
+
+    if  my_fig.layout.scene1.camera.eye.x == None:
+        my_fig.update_layout(scene_camera=camera)
+
+    new_x = my_fig.layout.scene1.camera.eye.x
+    new_y = my_fig.layout.scene1.camera.eye.y
+    new_z = my_fig.layout.scene1.camera.eye.z
+    print(new_x, new_y, new_z)
+    #print(test_variable)
     """
-    contribution_fig.update_traces(textposition='top center')
+    contribution_fig.update_traces(textposition='top center', marker_size=5)
+
+
 
 
     # scree plot
