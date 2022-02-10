@@ -15,6 +15,8 @@ from utility import dataset as ds
 import required_functionalities as rf
 import json
 
+import plotly.graph_objs as go
+
 
 """
 DIRECTORY FORMAT:
@@ -339,7 +341,7 @@ def update_dataframe(value, new_path):
     # contribution of variables
     contribution_data = pd.read_csv(
         new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
-    labels_pca = list(contribution_data.iloc[:,0])
+    labels_pca = list(contribution_data.iloc[:, 0])
 
     details_list = []
     for i in labels_pca:
@@ -349,18 +351,18 @@ def update_dataframe(value, new_path):
         else:
             details_list.append("")
 
-
+    PC1_data = contribution_data.get("PC1")
+    PC2_data = contribution_data.get("PC2")
+    PC3_data = contribution_data.get("PC3")
 
     contribution_fig = px.scatter_3d(contribution_data,
                                   title="Contribution of variables",
                                   x="PC1", y="PC2", z="PC3",
-                                  range_x=[-1, 1], range_y=[-1, 1], range_z=[1,1],
+                                  range_x=[-1, 1], range_y=[-1, 1], range_z=[-1,1],
                                   color=labels_pca,
                                   hover_data=[details_list],
 
                                   )
-
-
 
     # sync camera angles
     """
@@ -377,10 +379,37 @@ def update_dataframe(value, new_path):
     print(new_x, new_y, new_z)
     #print(test_variable)
     """
-    contribution_fig.update_traces(textposition='top center', marker_size=5)
 
+    # get points
+    point_listx = []
+    point_listy = []
+    point_listz = []
+    for x in range(11):
+        point_listx.append(PC1_data[x])
+        point_listy.append(PC2_data[x])
+        point_listz.append(PC3_data[x])
 
+    # calc x,y,z
+    vector_listx = []
+    vector_listy = []
+    vector_listz = []
+    for i in range(11):
+        vector_listx.append(0)
+        vector_listx.append(point_listx[i])
 
+        vector_listy.append(0)
+        vector_listy.append(point_listy[i])
+
+        vector_listz.append(0)
+        vector_listz.append(point_listz[i])
+
+    # update Scatter
+    contribution_fig.add_traces(go.Scatter3d(name="Arrows", mode="lines",
+                                x=vector_listx,
+                                y=vector_listy,
+                                z=vector_listz, showlegend=True, hoverinfo='skip'))
+
+    contribution_fig.update_traces(textposition='top center', marker_size=5,  hovertemplate=None)
 
     # scree plot
     pca_data = pd.read_csv(
