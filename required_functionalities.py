@@ -118,17 +118,32 @@ def colorRampPalette(colors, n):
     return result
 
 
-def qualitativeColours(n):
+def qualitativeColours(n, color_root=None):
     """ Generates a color palette in order to be able to differentiate between
     individual taxa as well as possible.
     :param n:   Number of required colors.
+    :param color_root a color hex string, which define the pole label color.
     :return:    Gives a list with hex color strings.
     """
-    color_root = ['#ab0000', "#f0ac00", "#449600", "#00db8b", "#23157d"]
+    defauld_root = ["#DF0101", "#FFFF00", "#298A08", "#00FF00", "#01DFD7", "#0101DF", "#F781BE"]
 
-    if n > 5:
-        color_root = ["#DF0101", "#FFFF00", "#298A08", "#00FF00",
-                      "#01DFD7", "#0101DF", "#F781BE"]
+    if color_root:
+        try:
+            color_root = color_root.split()
+
+            # Simply data check, not valid against none hex letters.
+            for i in color_root:
+                if len(i) != 7 or i[0] != '#':
+                    print("Error: required_functionalities->qualitiveColours: ", "ValueError: not a hex color string.")
+                    color_root = defauld_root
+                    break
+
+        except ... as e:
+            # TODO Exchange print with common log function.
+            print("Error: required_functionalities->qualitiveColours: ", e)
+            color_root = defauld_root
+    else:
+        color_root = defauld_root
 
     return colorRampPalette(color_root, n)
 
