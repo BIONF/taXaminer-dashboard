@@ -113,7 +113,7 @@
   },
   "g_pearson_r_c": {
     "short": "Pearson's corr. coefficient (with contig)",
-    "details": "Pearson’s correlation coefficient for the tetranucleotide-derived z-score vectors of the given gene and its respective contig",
+    "details": "Pearson’s correlation coefficient for the tetranucleotide-derived z-score vectors of the given gene and its respective contig"
   },
   "g_pearson_p_c": {
     "short": "% correlation of two random sequences of Pearson's corr.",
