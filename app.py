@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import math
 import layout
 from dash import callback_context, dcc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 from utility import data_io as milts_files
@@ -53,6 +53,7 @@ hover_data = ['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
+recent_click_scat_data = None
 recent_select_data = None
 last_selection = None
 
@@ -129,6 +130,7 @@ def update_table_columns(selected_vars, sel_cols, legend_cols):
     Output('textarea-taxon', 'value'),
     Output('table_selection', 'active_cell'),
     Input('scatter3d', 'clickData'),
+    Input('scatter_matrix', 'clickData'),
     Input('scatter_matrix', 'selectedData'),
     Input('table_selection', 'active_cell'),
     Input('searchbar', 'value'),
@@ -136,7 +138,7 @@ def update_table_columns(selected_vars, sel_cols, legend_cols):
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks')
 )
-def select(click_data, select_data, selection_table_cell, search_data,
+def select(click_data, click_scat_data, select_data, selection_table_cell, search_data,
            button_reset, button_add_legend_to_select, reload):
     """
     Common function for different modes of selection from UI elements
@@ -149,6 +151,7 @@ def select(click_data, select_data, selection_table_cell, search_data,
 
     my_point = ""
     global recent_click_data
+    global recent_click_scat_data
     global recent_select_data
     global last_selection
     global glossary
@@ -163,6 +166,14 @@ def select(click_data, select_data, selection_table_cell, search_data,
                 my_dataset.unselect(it['customdata'][1])
             else:
                 my_dataset.select(it['customdata'][1])
+    else:
+        # Click in scatter matrix to select a single point.
+        if click_scat_data and click_scat_data != recent_click_scat_data:
+            recent_click_scat_data = click_scat_data
+            if is_remove_mode:
+                my_dataset.unselect(click_scat_data['points'][0]['customdata'][1])
+            else:
+                my_dataset.select(click_scat_data['points'][0]['customdata'][1])
 
     # plot click
     if click_data and click_data != recent_click_data:
@@ -280,19 +291,44 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     return is_select_mode, is_remove_mode, is_select_mode == is_remove_mode
 
 
+#app.clientside_callback("""
+#    function(color_root, dot_size, fig){
+#        console.log(fig)
+#        console.log(fig.data)
+#        alert("I will do what´s in my power. ")
+#        return ""
+#    }
+#    """,
+#    Output('dead-output', 'children'),
+#    Input('colorscale-select', 'value'),
+#    Input('slider-dot-size', 'value'),
+#    State('scatter3d', 'figure'),
+#    prevent_initial_call=True
+#    )
+
+#@app.callback(Output('dead-output', 'children'),
+#              Input('slider-dot-size', 'value'))
+#def test(value):
+#    print(value)
+#    return ""
+
 @app.callback(
     Output('scatter3d', 'figure'),
     Output('summary', 'value'),
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
     Input('evalue-slider', 'value'),
-    Input('dataset_select', 'value')
+    Input('dataset_select', 'value'),
+    Input('colorscale-select', 'value'),
+    Input('slider-dot-size', 'value')
 )
-def update_dataframe(value, new_path):
+def update_dataframe(value, new_path, color_root, dot_size):
     """
     Update dataset and apply filters
     :param value: value of e-value slider
     :param new_path: path to dataset
+    :param color_root a color hex string, which define the pole label color.
+    :param dot_size size of the plot dots.
     :return: New values for UI Components
     """
     global hover_data
@@ -312,14 +348,15 @@ def update_dataframe(value, new_path):
 
     # e-value filter
     value = 1 * math.e ** (-value)
-    my_data = my_dataset.get_plot_data({'e-value': value})
+    my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
                            color='plot_label', hover_data=hover_data,
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID'])
 
-    my_fig.update_traces(marker=dict(size=3))
+
+    my_fig.update_traces(marker=dict(size=dot_size))
     my_fig.update_traces(
         hovertemplate=rf.createHovertemplate(hover_data, 2, 2))
     rf.SetCustomColorTraces(my_fig, 0)
