@@ -308,8 +308,7 @@ class Layout:
                                               "id": "best_hit"},
                                              {"name": "e-value",
                                               "id": "bh_evalue"}],
-                                    data=my_dataset.get_data_original().to_dict(
-                                        'records'),
+
                                 ),
                             ], className="d-flex m-2"),
                         ], label="Selection Tools"),
