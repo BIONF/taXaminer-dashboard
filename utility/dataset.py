@@ -174,8 +174,11 @@ class DataSet:
 
             # show only the first hit
             for index, row in my_rows.iterrows():
-                single = str(row['sscinames']).split(';')[0]
-                my_rows.at[index, 'sscinames'] = single
+                # truncate e-value
+                my_rows.at[index, 'evalue'] = '{:.3g}'.format(row['evalue'])
+                # only return the first name/id
+                my_rows.at[index, 'sscinames'] = str(row['sscinames']).split(';')[0]
+                my_rows.at[index, 'staxids'] = str(row['staxids']).split(';')[0]
             return my_rows
 
 

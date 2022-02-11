@@ -22,13 +22,18 @@ class Layout:
         # variable selection diamond data
         taxonomic_hits_vars = []
         taxonomic_cols_initial = []
-        taxonomic_hits_names = ['pident', 'length', 'mismatch', 'gapopen',
-                               'qstart', 'qend', 'sstart', 'send', 'evalue',
-                               'bitscore', 'staxids', 'sscinames']
+        taxonomic_hits_names = ['sscinames', 'bitscore', 'evalue', 'pident',
+                                'length', 'mismatch', 'gapopen', 'qstart',
+                                'qend', 'sstart', 'send', 'staxids']
 
         for col in taxonomic_hits_names:
+            # one exception
+            if col == "sscinames":
+                label = "hit taxon"
+            else:
+                label = col
             taxonomic_hits_vars.append({"label": col, "value": col})
-            taxonomic_cols_initial.append({"name": col, "id": col})
+            taxonomic_cols_initial.append({"name": label, "id": col})
 
         # select & plot table
         variables = my_dataset.get_data_original().columns.values.tolist()
@@ -160,10 +165,12 @@ class Layout:
                                     ),
                                     html.Div([
                                         dash_table.DataTable(id='table-hits',
-                                                             page_size=25,
+                                                             page_size=20,
+                                                             style_header={'textAlign': 'left'},
                                                              style_table={
                                                                  'overflowX': 'auto',
                                                                  'height': 'auto'},
+                                                             style_cell={'textAlign': 'left'},
                                                              sort_action='native',
                                                              sort_mode='multi',
                                                              columns=taxonomic_cols_initial, )
@@ -242,9 +249,9 @@ class Layout:
                         dbc.Col(children=[
                             html.Span("Dot size (px)"),
                             dcc.Slider(id='slider-dot-size',
-                                       min=0.2,
+                                       min=1,
                                        max=8,
-                                       step=0.2,
+                                       step=1,
                                        value=3
                                        )
                         ]),
