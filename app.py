@@ -587,9 +587,6 @@ def download(click_data):
     prot_ids = []
     key_list = list(my_dataset.selection_keys)
 
-    # empty set
-    key_list.remove('')
-
     # replace by protIDs
     for key in key_list:
         prot_ids.append(my_dataset.get_protID(key))
