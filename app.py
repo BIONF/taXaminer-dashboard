@@ -373,7 +373,6 @@ def update_dataframe(value, new_path, color_root, dot_size):
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID'])
 
-
     my_fig.update_traces(marker=dict(size=dot_size))
     my_fig.update_traces(
         hovertemplate=rf.createHovertemplate(hover_data, 2, 2))
@@ -384,7 +383,7 @@ def update_dataframe(value, new_path, color_root, dot_size):
 
     # contribution of variables
     contribution_data = pd.read_csv(
-        new_path + "PCA_and_clustering\PCA_results\pca_loadings.csv")
+        new_path + "PCA_and_clustering/PCA_results/pca_loadings.csv")
     labels_pca = list(contribution_data.iloc[:, 0])
 
     # PCA plot
