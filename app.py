@@ -291,27 +291,6 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     return is_select_mode, is_remove_mode, is_select_mode == is_remove_mode
 
 
-#app.clientside_callback("""
-#    function(color_root, dot_size, fig){
-#        console.log(fig)
-#        console.log(fig.data)
-#        alert("I will do what´s in my power. ")
-#        return ""
-#    }
-#    """,
-#    Output('dead-output', 'children'),
-#    Input('colorscale-select', 'value'),
-#    Input('slider-dot-size', 'value'),
-#    State('scatter3d', 'figure'),
-#    prevent_initial_call=True
-#    )
-
-#@app.callback(Output('dead-output', 'children'),
-#              Input('slider-dot-size', 'value'))
-#def test(value):
-#    print(value)
-#    return ""
-
 @app.callback(
     Output('scatter3d', 'figure'),
     Output('summary', 'value'),
