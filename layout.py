@@ -31,7 +31,14 @@ class Layout:
                     {"label": str(variable), "value": str(variable)})
 
         # colorscales
-        colorscales = [{'label': "Rainbow", 'value': 'rainbow'}]
+        with open("./static/colorscale.json") as c:
+            colorscales = dict(json.load(c))
+
+        if not colorscales or not colorscales['data'] or len(colorscales['data']) == 0:
+            colorscales = {"data": [{
+                                    "label": "Rainbow",
+                                    "value": "#DF0101 #FFFF00 #298A08 #00FF00 #01DFD7 #0101DF #F781BE"
+                                    }]}
 
         layout = dbc.Container(fluid=True, children=[
             dbc.NavbarSimple(
@@ -48,7 +55,6 @@ class Layout:
                         dcc.Graph(
                             id="scatter3d",
                             config={"displayModeBar": True},
-                            animate=True,
                             className="plot"
                         )]),
 
@@ -198,21 +204,23 @@ class Layout:
                 dbc.Col([
                     dbc.Row([
                         # Dot size selection
-                        dbc.Col([
+                        dbc.Col(children=[
                             html.Span("Dot size (px)"),
-                            dcc.Slider(0, 20, 5,
-                                       value=10,
-                                       id='dot-size'
-                                       ),
+                            dcc.Slider(id='slider-dot-size',
+                                       min=0.2,
+                                       max=8,
+                                       step=0.2,
+                                       value=3
+                                       )
                         ]),
                         # colorscale selection
                         dbc.Col([
                             html.Span("Colorscale"),
                             dcc.Dropdown(
                                 id='colorscale-select',
-                                options=colorscales,
-                                value=colorscales[0].get(
-                                    'value')
+                                clearable=False,
+                                options=colorscales['data'],
+                                value=colorscales['data'][0]['value']
                             )
                         ]),
                     ]),
