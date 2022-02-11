@@ -171,10 +171,10 @@ class Layout:
                                         dbc.Card([
                                             dbc.CardHeader("PCA Data"),
                                             dcc.Graph(
-                                                id="contribution"
+                                                id="contribution",
                                             ),
                                             dcc.Graph(
-                                                id="scree"
+                                                id="scree",
                                             )
                                         ])
                                     ])
@@ -186,6 +186,7 @@ class Layout:
                                     dbc.Col([
                                         dcc.Graph(id='scatter_matrix',
                                                   responsive=True),
+
                                     ])
                                 ]),
                             ]),

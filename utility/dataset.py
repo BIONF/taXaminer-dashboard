@@ -6,7 +6,6 @@ class DataSet:
     """
     Represents a loaded dataset and supports selection
     """
-
     def __init__(self, path):
         # column names according to the diamond documentation
         taxonomic_hits_rows = ['qseqid', 'sseqid', 'pident', 'length',
