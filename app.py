@@ -96,6 +96,28 @@ def print_seq_data(hover_data, search_data):
 
 
 @app.callback(
+    Output('variable-info', 'value'),
+    Input('contribution', 'clickData'))
+def show_variable_desciption(click_data):
+    """
+    gives a description to each of the variables when their point is clicked in the Graph
+    :param click_data:
+    :return:
+    """
+    print(click_data)
+    if not click_data:
+        return "Click on a data point to get a short description of the variable"
+
+    my_dot = click_data['points'][0]['customdata'][0]
+    print(my_dot)
+
+    if not my_dot:
+        return "No matching Sequence data"
+    else:
+        return str(my_dot)
+
+
+@app.callback(
     Output('table_selection', 'columns'),
     Output('legend_selection', 'columns'),
     Input('variable-selection', 'value'),
@@ -355,7 +377,7 @@ def update_dataframe(value, new_path):
                                      range_z=[-1, 1],
                                      color=labels_pca,
                                      hover_data=[details_list],
-                                     height=520)
+                                     height=550)
 
     # get points
     point_list_x = []
@@ -390,7 +412,7 @@ def update_dataframe(value, new_path):
                                    marker_size=5,
                                    hovertemplate=None)
     # legend
-    contribution_fig.update_layout(legend=dict(orientation="h",
+    contribution_fig.update_layout(legend=dict(orientation="v",
                                                itemsizing='constant'))
 
     # scree plot

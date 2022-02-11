@@ -164,6 +164,18 @@ class Layout:
                                             dcc.Graph(
                                                 id="contribution",
                                             ),
+                                            # info of varibale
+                                            dbc.CardHeader(
+                                                "Description"),
+                                            dcc.Textarea(
+                                                id='variable-info',
+                                                value='Hover over a Variable to get a short description',
+                                                disabled=True,
+                                                style={'height': 50,
+                                                       'width': 'fill',
+                                                       "verticalAlign": "top",
+                                                       'horizontalAlign': 'left'},
+                                            ),
                                             dcc.Graph(
                                                 id="scree",
                                             )
