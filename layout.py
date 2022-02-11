@@ -166,7 +166,7 @@ class Layout:
                                             ),
                                             # info of varibale
                                             dbc.CardHeader(
-                                                "Description"),
+                                                "Description of variables"),
                                             dcc.Textarea(
                                                 id='variable-info',
                                                 value='Hover over a Variable to get a short description',
