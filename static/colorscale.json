@@ -1,4 +1,22 @@
 {
+  "sources": [
+	{
+		"Description":"INTRODUCTION TO COLOUR SCHEMES",
+		"Author":  "Paul Tol (mail: p.j.j.tol@sron.nl)",
+		"Link": "https://personal.sron.nl/~pault/#fig:scheme_bright"
+	},
+	{
+		"Description":"Best Practices for Colour Blind Friendly Publications and Descriptions",
+		"Author":  "Alba Fernández-Barral, CTAO Outreach and Education Coordinator",
+		"Link": "https://www.cta-observatory.org/wp-content/uploads/2020/10/CTA_ColourBlindness_BestPractices-1.pdf"
+	},
+	{
+		"Description":"Best series of colors to use for differentiating series in publication-quality plots",
+		"Author":  "StackExchange.com Acount namens:  enigmaticPhysicist, Joseph D'Arimathea, a different ben",
+		"Link": "https://stats.stackexchange.com/questions/118033/best-series-of-colors-to-use-for-differentiating-series-in-publication-quality"
+	}
+	
+  ],
   "data": [
     {
       "label": "Rainbow",
@@ -13,15 +31,47 @@
       "value": "#e41a1c #377eb8 #4daf4a #984ea3 #ff7f00 #ffff33 #a65628 #f781bf"
     },
 	{
-      "label": "Colorcycle",
-      "value": "#332288 #88CCEE #44AA99 #117733 #999933 #DDCC77 #CC6677 #882255 #AA4499"
+      "label": "Balance Eyesight",
+      "value": "#77AADD #EE8866 #EEDD88 #FFAABB #99DDFF #44BB99 #BBCC33 #AAAA00 #DDDDDD"
+    },
+	{
+      "label": "Bright Colorbilnd",
+      "value": "#4477AA #EE6677 #228833 #CCBB44 #66CCEE #AA3377 #BBBBBB"
+    },
+	{
+      "label": "Contrast Colorblind",
+      "value": "#EE7733 #0077BB #33BBEE #EE3377 #CC3311 #009988 #BBBBBB"
+    },
+	{
+      "label": "Vibrant Colorblind",
+      "value": "#CC6677 #332288 #DDCC77 #117733 #88CCEE #882255 #44AA99 #999933 #AA4499"
+    },
+	{
+      "label": "Silk Colorblind",
+      "value": "#BBCCEE #CCEEFF #CCDDAA #EEEEBB #FFCCCC #DDDDDD #222255 #225555 #225522 #666633 #663333 #555555"
+    },
+	{
+      "label": "Seaborn Colorblind",
+      "value": "#0072b2 #009e73 #d55e00 #cc79a7 #f0e442 #56b4e9"
+    },
+	{
+      "label": "Tableau Colorblind",
+      "value": "#006ba4 #ff800f #ababab #595959 #5f9ed1 #c85200 #898989 #a2c8ec #ffbc79 #cfcfcf"
+    },
+	{
+      "label": "Seaborn Dark",
+      "value": "#1f77b4 #ff7f0e #2ca02c #d62728 #9467bd #8c564b #e377c2 #7f7f7f #bcbd23 #17becf"
     },
 	{
       "label": "Bluesky",
       "value": "#2271b3 #89cff0 #3bbcd3 #058b8c"
     },
 	{
-      "label": "Dull",
+      "label": "Colorcycle",
+      "value": "#332288 #88CCEE #44AA99 #117733 #999933 #DDCC77 #CC6677 #882255 #AA4499"
+    },
+	{
+      "label": "Orange Island",
       "value": "#E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7 #000000"
     }
   ]
