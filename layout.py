@@ -41,7 +41,6 @@ class Layout:
                                     }]}
 
         layout = dbc.Container(fluid=True, children=[
-            html.Div(id="dead-output", style={"display": "none"}),
             dbc.NavbarSimple(
                 brand="MILTS",
                 brand_href="#",
@@ -56,7 +55,6 @@ class Layout:
                         dcc.Graph(
                             id="scatter3d",
                             config={"displayModeBar": True},
-                            animate=True,
                             className="plot"
                         )]),
 
