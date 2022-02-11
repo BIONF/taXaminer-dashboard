@@ -98,21 +98,21 @@ def print_seq_data(hover_data, search_data):
 @app.callback(
     Output('variable-info', 'value'),
     Input('contribution', 'clickData'))
-def show_variable_desciption(click_data):
+def show_variable_description(click_data):
     """
     gives a description to each of the variables when their point is clicked in the Graph
     :param click_data:
     :return:
     """
-    print(click_data)
+
     if not click_data:
         return "Click on a data point to get a short description of the variable"
 
     my_dot = click_data['points'][0]['customdata'][0]
-    print(my_dot)
+
 
     if not my_dot:
-        return "No matching Sequence data"
+        return "No matching data"
     else:
         return str(my_dot)
 
