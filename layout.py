@@ -31,8 +31,11 @@ class Layout:
                     {"label": str(variable), "value": str(variable)})
 
         # colorscales
-        with open("./static/colorscale.json") as c:
-            colorscales = dict(json.load(c))
+        try:
+            with open("./static/colorscale.json") as c:
+                colorscales = dict(json.load(c))
+        except FileNotFoundError:
+            colorscales = None
 
         if not colorscales or not colorscales['data'] or len(colorscales['data']) == 0:
             colorscales = {"data": [{
