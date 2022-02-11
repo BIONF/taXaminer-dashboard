@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "label": "Rainbow",
+      "value": "#DF0101 #FFFF00 #298A08 #00FF00 #01DFD7 #0101DF #F781BE"
+    },
+	{
+      "label": "Mixed",
+      "value": "#e6194b #3cb44b #ffe119 #0082c8 #f58231 #911eb4 #46f0f0 #f032e6 #d2f53c #fabebe #008080 #e6beff #aa6e28 #fffac8 #800000 #aaffc3 #808000 #ffd8b1 #000080 #808080 #ffffff #000000"
+    },
+    {
+      "label": "Colorbrewer",
+      "value": "#e41a1c #377eb8 #4daf4a #984ea3 #ff7f00 #ffff33 #a65628 #f781bf"
+    },
+	{
+      "label": "Colorcycle",
+      "value": "#332288 #88CCEE #44AA99 #117733 #999933 #DDCC77 #CC6677 #882255 #AA4499"
+    },
+	{
+      "label": "Bluesky",
+      "value": "#2271b3 #89cff0 #3bbcd3 #058b8c"
+    },
+	{
+      "label": "Dull",
+      "value": "#E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7 #000000"
+    }
+  ]
+}
