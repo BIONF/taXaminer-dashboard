@@ -594,5 +594,22 @@ def download(click_data):
     return dcc.send_file(link)
 
 
+@app.callback(
+    Output('table-hits', 'columns'),
+    Input('variable-selection-diamond', 'value'),
+    prevent_initial_call=True
+)
+def update_diamond_columns(selected_vars):
+    """
+    Update the columns of the diamond data table
+    :param selected_vars: variables selcted by user
+    :return: selected cols as list
+    """
+    columns = []
+    for variable in selected_vars:
+        columns.append({"name": variable, "id": variable})
+    return columns
+
+
 if __name__ == "__main__":
     app.run_server(host='127.0.0.1', port='8050', debug=True)

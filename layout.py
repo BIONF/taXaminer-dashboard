@@ -19,6 +19,18 @@ class Layout:
         with open("./static/glossary.json") as f:
             glossary = json.load(f)
 
+        # variable selection diamond data
+        taxonomic_hits_vars = []
+        taxonomic_cols_initial = []
+        taxonomic_hits_names = ['pident', 'length', 'mismatch', 'gapopen',
+                               'qstart', 'qend', 'sstart', 'send', 'evalue',
+                               'bitscore', 'staxids', 'sscinames']
+
+        for col in taxonomic_hits_names:
+            taxonomic_hits_vars.append({"label": col, "value": col})
+            taxonomic_cols_initial.append({"name": col, "id": col})
+
+        # select & plot table
         variables = my_dataset.get_data_original().columns.values.tolist()
         for variable in variables:
             if str(variable) in glossary:
@@ -37,11 +49,12 @@ class Layout:
         except FileNotFoundError:
             colorscales = None
 
-        if not colorscales or not colorscales['data'] or len(colorscales['data']) == 0:
+        if not colorscales or not colorscales['data'] or len(
+                colorscales['data']) == 0:
             colorscales = {"data": [{
-                                    "label": "Rainbow",
-                                    "value": "#DF0101 #FFFF00 #298A08 #00FF00 #01DFD7 #0101DF #F781BE"
-                                    }]}
+                "label": "Rainbow",
+                "value": "#DF0101 #FFFF00 #298A08 #00FF00 #01DFD7 #0101DF #F781BE"
+            }]}
 
         layout = dbc.Container(fluid=True, children=[
             dbc.NavbarSimple(
@@ -107,7 +120,7 @@ class Layout:
                                                     ),
                                                     html.Div([
                                                         dbc.Button(
-                                                            "Find Best hit on NCBI",
+                                                            "Find Taxonomy on NCBI",
                                                             id='NCBI',
                                                             href="https://www.ncbi.nlm.nih.gov/",
                                                             external_link=True,
@@ -136,21 +149,28 @@ class Layout:
                                     ], className="m-2"),
                             dbc.Tab([
                                 dbc.Card([
+                                    # diamond
                                     dbc.CardHeader("Diamond Output"),
-                                    dash_table.DataTable(id='table-hits',
-                                                         page_size=25,
-                                                         style_table={'overflowX': 'auto',
-                                                                      'height': 'auto'})
+                                    dcc.Dropdown(
+                                        options=taxonomic_hits_vars,
+                                        multi=True,
+                                        id='variable-selection-diamond',
+                                        value=taxonomic_hits_names,
+                                        className="m-2"
+                                    ),
+                                    html.Div([
+                                        dash_table.DataTable(id='table-hits',
+                                                             page_size=25,
+                                                             style_table={
+                                                                 'overflowX': 'auto',
+                                                                 'height': 'auto'},
+                                                             sort_action='native',
+                                                             sort_mode='multi',
+                                                             columns=taxonomic_cols_initial, )
+                                    ], className="m-2")
                                 ], className="m-2"),
                             ], label="Diamond Output"),
                             dbc.Tab([
-                                dbc.Card([
-                                    dbc.CardHeader("Enable/Disable Filters"),
-                                    dbc.Checkbox(label="Scatterplot legend",
-                                                 className="m-1 form-switch"),
-                                    dbc.Checkbox(label="e-value",
-                                                 className="m-1 form-switch"),
-                                ], className="m-2"),
                                 dbc.Card([
                                     dbc.CardHeader("e-value Filter"),
                                     dcc.Slider(
@@ -174,7 +194,7 @@ class Layout:
                                     ),
                                 ], className="m-2"),
                             ], label="Filter", className="m-2"),
-                            dbc.Tab(label='PCA', children=[
+                            dbc.Tab(label='PCA Data', children=[
                                 dbc.Row([
                                     dbc.Col([
                                         dbc.Card([
@@ -341,7 +361,6 @@ class Layout:
                                               "id": "best_hit"},
                                              {"name": "e-value",
                                               "id": "bh_evalue"}],
-
                                 ),
                             ], className="d-flex m-2"),
                         ], label="Selection Tools"),
