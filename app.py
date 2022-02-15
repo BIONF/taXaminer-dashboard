@@ -338,9 +338,10 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
-    Input('slider-dot-size', 'value')
+    Input('slider-dot-size', 'value'),
+    State('scatter3d', 'relayoutData')
 )
-def update_dataframe(value, new_path, color_root, dot_size):
+def update_dataframe(value, new_path, color_root, dot_size, relayout):
     """
     Update dataset and apply filters
     :param value: value of e-value slider
@@ -372,6 +373,9 @@ def update_dataframe(value, new_path, color_root, dot_size):
                            color='plot_label', hover_data=hover_data,
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID'])
+    # keep existing camera position.
+    if relayout and 'scene.camera' in relayout:
+        my_fig.update_layout(scene_camera=relayout['scene.camera'])
 
     my_fig.update_traces(marker=dict(size=dot_size))
     my_fig.update_traces(
@@ -395,9 +399,11 @@ def update_dataframe(value, new_path, color_root, dot_size):
         else:
             details_list.append("")
 
-    pc1_data = contribution_data.get("PC1")
-    pc2_data = contribution_data.get("PC2")
-    pc3_data = contribution_data.get("PC3")
+    pc1 = contribution_data.get("PC1")
+    pc2 = contribution_data.get("PC2")
+    pc3 = contribution_data.get("PC3")
+    pc_len = (len(pc3) if len(pc3) < len(pc1) else len(pc1)) if len(pc1) < len(pc2) else \
+             (len(pc3) if len(pc3) < len(pc2) else len(pc2))
 
     contribution_fig = px.scatter_3d(contribution_data,
                                      title="Contribution of variables",
@@ -412,16 +418,17 @@ def update_dataframe(value, new_path, color_root, dot_size):
     point_list_x = []
     point_list_y = []
     point_list_z = []
-    for x in range(11):
-        point_list_x.append(pc1_data[x])
-        point_list_y.append(pc2_data[x])
-        point_list_z.append(pc3_data[x])
+
+    for x in range(pc_len):
+        point_list_x.append(pc1[x])
+        point_list_y.append(pc2[x])
+        point_list_z.append(pc3[x])
 
     # calc x,y,z
     vector_list_x = []
     vector_list_y = []
     vector_list_z = []
-    for i in range(11):
+    for i in range(pc_len):
         vector_list_x.append(0)
         vector_list_x.append(point_list_x[i])
         vector_list_y.append(0)
