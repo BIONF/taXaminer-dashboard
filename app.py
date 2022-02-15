@@ -354,6 +354,13 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     global path
     global my_dataset
 
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    # update camera / legend?
+    update_layout = True
+    if changed_id in ['colorscale-select.value']:
+        update_layout = False
+
     # only reload the .csv if the path has changed
     if new_path != path:
         my_dataset = ds.DataSet(new_path)
@@ -479,6 +486,10 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     # update reference path
     path = new_path
+
+    # update legend / selection / view flag
+    my_fig.layout.uirevision = not update_layout
+
     return my_fig, summary, contribution_fig, scree_fig
 
 
