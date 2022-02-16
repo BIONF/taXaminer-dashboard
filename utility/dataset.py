@@ -1,5 +1,6 @@
 import pandas as pd
 import required_functionalities as rf
+import re
 
 
 class DataSet:
@@ -36,6 +37,23 @@ class DataSet:
         except ValueError:
             self.taxonomic_hits = None
             print("Failed to read taxonomic_hits.txt, the file might be corrupted!")
+
+        # some variables might have varying numbers attached to them
+        for col in self.original_data.columns:
+            # c-columns
+            my_match = re.findall(r"c_.*_[1-9][0-9]*$", col)
+            if len(my_match) != 0:
+                new_col = re.sub("[1-9][0-9]*", "0", my_match[0])
+                self.original_data.rename(columns={my_match[0]: new_col},
+                                          inplace=True)
+                continue
+
+            # g-columns
+            my_match = re.findall(r"g_.*_[1-9][0-9]*$", col)
+            if len(my_match) != 0:
+                new_col = re.sub("[1-9][0-9]*", "0", my_match[0])
+                self.original_data.rename(columns={my_match[0]: new_col},
+                                          inplace=True)
 
         # init selection keys
         self.selection_keys = set()
