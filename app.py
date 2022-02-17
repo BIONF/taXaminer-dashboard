@@ -358,7 +358,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     # update camera / legend?
     update_layout = True
-    if changed_id in ['colorscale-select.value']:
+    if changed_id in ['colorscale-select.value', 'slider-dot-size.value']:
         update_layout = False
 
     # only reload the .csv if the path has changed
