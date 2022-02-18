@@ -1,4 +1,6 @@
 import os
+import time
+
 import dash
 import dash_bootstrap_components as dbc
 import math
@@ -58,6 +60,7 @@ recent_click_data = None
 recent_click_scat_data = None
 recent_select_data = None
 last_selection = None
+currently_updating_legend = False
 
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
@@ -386,8 +389,11 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     my_fig.update_traces(marker=dict(size=dot_size))
 
-    hover_template = "Best hit: %{customdata[2]} <br>"
-    hover_template += "Best hit e-value: %{customdata[4]} <br>"
+    hover_template = "<extra>%{customdata[5]} <br> " \
+                     "<extra>%{customdata[1]}</extra>"\
+                     "Best hit: %{customdata[2]} <br>" \
+                     "Best hit e-value: %{customdata[4]} <br>" \
+                     "Taxonomic assignment: %{customdata[6]} <br>"
     my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
@@ -547,6 +553,11 @@ def display_click_data(selectedData, n_clicks, curr_data):
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
+    global currently_updating_legend
+    if currently_updating_legend:
+        time.sleep(1)
+    currently_updating_legend = True
+
     if changed_id != 'btn-sync.n_clicks':
         return curr_data
 
@@ -569,6 +580,7 @@ def display_click_data(selectedData, n_clicks, curr_data):
         if not label_dictionary[i]:
             new_data = new_data[new_data['plot_label'] != i]
 
+    currently_updating_legend = False
     return new_data.to_dict('records')
 
 
