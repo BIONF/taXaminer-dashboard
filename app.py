@@ -379,14 +379,16 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
                            color='plot_label', hover_data=hover_data,
                            custom_data=['taxa_color', 'g_name', 'best_hit',
-                                        'protID'])
+                                        'protID', 'bh_evalue'])
     # keep existing camera position.
     if relayout and 'scene.camera' in relayout:
         my_fig.update_layout(scene_camera=relayout['scene.camera'])
 
     my_fig.update_traces(marker=dict(size=dot_size))
-    my_fig.update_traces(
-        hovertemplate=rf.createHovertemplate(hover_data, 2, 2))
+
+    hover_template = "Best hit: %{customdata[2]} <br>"
+    hover_template += "Best hit e-value: %{customdata[4]} <br>"
+    my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
     my_fig.update_layout(legend=dict(title=dict(text='Taxa'),
