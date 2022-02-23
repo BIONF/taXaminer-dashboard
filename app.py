@@ -39,20 +39,13 @@ for file in os.listdir(base_path):
     if os.path.isdir(d):
         datasets.append(d + "/")
         dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
-#print("Datasets", datasets)
-my_dataset = ds.DataSet(datasets[0])
-path = datasets[0]
+print("Datasets", datasets)
 
-# creating a dictionary of the legend. Values indicate the visibility
-list_of_labels = my_dataset.get_data_original()['plot_label'].tolist()
-label_dictionary = dict.fromkeys(list_of_labels, True)
-del label_dictionary['Unassigned']
-legend_order = list(label_dictionary.keys())
-
-print("Legend_order : ", legend_order)
-print("Datasets: ", datasets)
-print("MyDataSet: ", datasets)
-print("Path: ", path)
+# data set globals
+path = None
+my_dataset = ds.DataSet()
+label_dictionary = {}
+legend_order = []
 
 # load glossary once
 with open("./static/glossary.json") as f:
@@ -73,7 +66,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
 app.title = "MILTS"
 
 my_layout = layout.Layout()
-app.layout = my_layout.get_layout(dropdowns, my_dataset)
+app.layout = my_layout.get_layout(dropdowns)
 
 
 @app.callback(
@@ -87,6 +80,10 @@ def print_seq_data(hover_data, search_data):
     :param search_data:
     :return:
     """
+    global path
+    if not path:
+        raise PreventUpdate
+
     if not hover_data:
         return "Hover of a data point to select it"
         # Allow user search
@@ -95,7 +92,6 @@ def print_seq_data(hover_data, search_data):
     else:
         # fetch protID from hover data
         my_dot = hover_data['points'][0]['customdata'][3]
-    global path
     seq = milts_files.get_protein_record(my_dot, path)
     if not seq:
         return "No matching Sequence data"
@@ -201,6 +197,10 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
     global recent_select_data
     global last_selection
     global glossary
+
+    global path
+    if not path:
+        raise PreventUpdate
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     # scatter matrix select
@@ -370,8 +370,9 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     :return: New values for UI Components
     """
 
-    global path
     global my_dataset
+    global path
+
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
@@ -383,12 +384,18 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     # only reload the .csv if the path has changed
     if new_path != path:
         my_dataset = ds.DataSet(new_path)
+        path = new_path
+
+    if not path:
+        raise PreventUpdate
+
     data = my_dataset.get_data_original()
 
     # legend selection
     global label_dictionary, legend_order
     label_dictionary = dict.fromkeys(data['plot_label'].tolist(), True)
-    del label_dictionary['Unassigned']
+    if 'Unassigned' in label_dictionary:
+        del label_dictionary['Unassigned']
     legend_order = list(label_dictionary.keys())
 
     # e-value filter
@@ -508,9 +515,6 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
         summary = "File summary.txt not found"
     summary = "".join(summary)
 
-    # update reference path
-    path = new_path
-
     # update legend / selection / view flag
     my_fig.layout.uirevision = not update_layout
 
@@ -566,6 +570,8 @@ def display_click_data(selectedData, n_clicks, curr_data):
     :param selectedData:
     :return: updated dataset to build the table new according to the visible parts of the legend
     """
+
+    # TODO bug wiht sync tahble with graph. will not get triggered....
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
