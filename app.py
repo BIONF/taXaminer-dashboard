@@ -44,8 +44,10 @@ print("Datasets", datasets)
 # data set globals
 path = None
 my_dataset = ds.DataSet()
+
+list_of_labels = []
 label_dictionary = {}
-legend_order = []
+legend_order = {}
 
 # load glossary once
 with open("./static/glossary.json") as f:
@@ -570,8 +572,6 @@ def display_click_data(selectedData, n_clicks, curr_data):
     :param selectedData:
     :return: updated dataset to build the table new according to the visible parts of the legend
     """
-
-    # TODO bug wiht sync tahble with graph. will not get triggered....
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
