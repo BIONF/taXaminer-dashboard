@@ -5,6 +5,7 @@ import dash
 import dash_bootstrap_components as dbc
 import math
 
+from dash.dash_table.Format import Format, Scheme
 from dash.exceptions import PreventUpdate
 
 import layout
@@ -142,12 +143,23 @@ def update_table_columns(selected_vars, sel_cols, legend_cols):
     # if selection has changed : build new column list
     if selected_vars:
         for variable in selected_vars:
-            # substitute non-internal name if possible
+            variable_dict = dict(id=variable)
+            if variable == "bh_evalue":
+                # truncate e-value
+                variable_dict['format'] = Format(precision=2,
+                                                 scheme=Scheme.decimal_or_exponent)
+                variable_dict['type'] = "numeric"
+
+            # use human-readable column names
             if str(variable) in glossary:
                 var_name = glossary[str(variable)]['short']
-                columns.append({"name": var_name, "id": variable})
+                variable_dict['name'] = var_name
             else:
-                columns.append({"name": variable, "id": variable})
+                variable_dict['name'] = str(variable)
+
+            # add column
+            columns.append(variable_dict)
+
         sel_cols = legend_cols = columns
     return sel_cols, legend_cols
 

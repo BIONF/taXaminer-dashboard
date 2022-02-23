@@ -1,6 +1,7 @@
 import json
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table
+from dash.dash_table.Format import Format, Scheme
 
 
 class Layout:
@@ -367,7 +368,15 @@ class Layout:
                                              {"name": "Best Hit",
                                               "id": "best_hit"},
                                              {"name": "e-value",
-                                              "id": "bh_evalue"}],
+                                              "id": "bh_evalue",
+                                              "type": "numeric",
+                                              "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
+                                    style_header={'textAlign': 'left'},
+                                    style_table={
+                                        'overflowX': 'auto',
+                                        'height': 'auto'},
+                                    style_cell={'textAlign': 'left'},
+                                    page_size=30,
                                 ),
                             ], className="d-flex m-2"),
                         ], label="Selection Tools"),
@@ -395,9 +404,17 @@ class Layout:
                                              {"name": "Taxon",
                                               "id": "plot_label"},
                                              {"name": "e-value",
-                                              "id": "bh_evalue"}],
+                                              "id": "bh_evalue",
+                                              "type": "numeric",
+                                              "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
                                     data=my_dataset.get_data_original().to_dict(
                                         'records'),
+                                    page_size=30,
+                                    style_header={'textAlign': 'left'},
+                                    style_table={
+                                        'overflowX': 'auto',
+                                        'height': 'auto'},
+                                    style_cell={'textAlign': 'left'},
                                     sort_action='native',
                                     sort_mode='multi',
                                 ),
