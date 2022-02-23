@@ -54,7 +54,6 @@ with open("./static/glossary.json") as f:
     glossary = json.load(f)
 
 # Global Settings
-hover_data = ['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment']
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
@@ -365,7 +364,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     :param dot_size size of the plot dots.
     :return: New values for UI Components
     """
-    global hover_data
+
     global path
     global my_dataset
 
@@ -392,7 +391,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
-                           color='plot_label', hover_data=hover_data,
+                           color='plot_label', hover_data=['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment'],
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID', 'bh_evalue'])
     # keep existing camera position.
@@ -401,11 +400,11 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     my_fig.update_traces(marker=dict(size=dot_size))
 
-    hover_template = "<extra>%{customdata[5]} <br> " \
-                     "<extra>%{customdata[1]}</extra>"\
-                     "Best hit: %{customdata[2]} <br>" \
+    hover_template = "%{customdata[5]} <br> " \
+                     "%{customdata[1]} <br>"\
+                     "<extra>Best hit: %{customdata[2]} <br>" \
                      "Best hit e-value: %{customdata[4]} <br>" \
-                     "Taxonomic assignment: %{customdata[6]} <br>"
+                     "Taxonomic assignment: %{customdata[6]} <br></extra>"
     my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
