@@ -24,7 +24,23 @@ class DataSet:
         # read data
         if path:
             self.original_data = pd.read_csv(path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
+
+            # fetch taxonomic hits, this may take a while
+            try:
+                self.taxonomic_hits = pd.read_csv(path + 'taxonomic_hits.txt',
+                                                  header=None,
+                                                  encoding='unicode_escape',
+                                                  sep='\t',
+                                                  names=taxonomic_hits_rows,
+                                                  dtype=taxonomic_hits_dtypes,
+                                                  skip_blank_lines=True)
+            except ValueError:
+                self.taxonomic_hits = None
+                print("Failed to read taxonomic_hits.txt, the file might be corrupted!")
+
         else:
+            # emtpy data for taxonomic_hits
+            self.taxonomic_hits = None
             # emtpy standard dataframe
             self.original_data = pd.DataFrame(data=[], columns=['g_name', 'c_name', 'c_num_of_genes', 'c_len',
                                             'c_pct_assemby_len','c_genelenm', 'c_genelensd', 'c_cov_0', 'c_covsd_0',
@@ -36,18 +52,8 @@ class DataSet:
                                             'Dim.2', 'Dim.3', 'protID', 'lcaID', 'lca', 'best_hitID', 'best_hit',
                                             'bh_evalue', 'corrected_lca', 'taxon_assignment', 'plot_label'])
 
-        # fetch taxonomic hits, this may take a while
-        try:
-            self.taxonomic_hits = pd.read_csv(path + 'taxonomic_hits.txt',
-                                              header=None,
-                                              encoding='unicode_escape',
-                                              sep='\t',
-                                              names=taxonomic_hits_rows,
-                                              dtype=taxonomic_hits_dtypes,
-                                              skip_blank_lines=True)
-        except ValueError:
-            self.taxonomic_hits = None
-            print("Failed to read taxonomic_hits.txt, the file might be corrupted!")
+
+
 
         # some variables might have varying numbers attached to them
         for col in self.original_data.columns:
