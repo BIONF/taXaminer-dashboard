@@ -39,7 +39,7 @@ for file in os.listdir(base_path):
     if os.path.isdir(d):
         datasets.append(d + "/")
         dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
-print("Datasets", datasets)
+#print("Datasets", datasets)
 my_dataset = ds.DataSet(datasets[0])
 path = datasets[0]
 
@@ -48,6 +48,11 @@ list_of_labels = my_dataset.get_data_original()['plot_label'].tolist()
 label_dictionary = dict.fromkeys(list_of_labels, True)
 del label_dictionary['Unassigned']
 legend_order = list(label_dictionary.keys())
+
+print("Legend_order : ", legend_order)
+print("Datasets: ", datasets)
+print("MyDataSet: ", datasets)
+print("Path: ", path)
 
 # load glossary once
 with open("./static/glossary.json") as f:
