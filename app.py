@@ -60,7 +60,6 @@ recent_click_data = None
 recent_click_scat_data = None
 recent_select_data = None
 last_selection = None
-currently_updating_legend = False
 
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
@@ -584,11 +583,6 @@ def display_click_data(selectedData, n_clicks, curr_data):
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
-    global currently_updating_legend
-    if currently_updating_legend:
-        time.sleep(1)
-    currently_updating_legend = True
-
     if changed_id != 'btn-sync.n_clicks':
         return curr_data
 
@@ -611,7 +605,6 @@ def display_click_data(selectedData, n_clicks, curr_data):
         if not label_dictionary[i]:
             new_data = new_data[new_data['plot_label'] != i]
 
-    currently_updating_legend = False
     return new_data.to_dict('records')
 
 

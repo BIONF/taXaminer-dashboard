@@ -150,11 +150,13 @@ class Layout:
                                     html.Div([
                                         dash_table.DataTable(id='table-hits',
                                                              page_size=20,
-                                                             style_header={'textAlign': 'left'},
+                                                             style_header={
+                                                                 'textAlign': 'left'},
                                                              style_table={
                                                                  'overflowX': 'auto',
                                                                  'height': 'auto'},
-                                                             style_cell={'textAlign': 'left'},
+                                                             style_cell={
+                                                                 'textAlign': 'left'},
                                                              sort_action='native',
                                                              sort_mode='multi',
                                                              columns=taxonomic_cols_initial, )
@@ -267,28 +269,31 @@ class Layout:
                         dbc.Tab([
                             dbc.Card([
                                 dbc.ButtonGroup([
-                                # sync button
-                                dbc.Button(
-                                    html.Span(
-                                        ["",
-                                         html.I(className="fas fa-arrow-down"),
-                                         html.Span(" Sync table with graph "),
-                                         html.I(className="fas fa-arrow-down")
-                                         ]),
-                                    color="primary",
-                                    size="md",
-                                    id="btn-sync"),
-                                # button to add table contents to selection
-                                dbc.Button([
-                                    html.Span(["", html.I(
-                                        className="fas fa-eye"),
-                                               html.Span(
-                                                   " Add all visible")])],
-                                    color="success",
-                                    id="button_add_legend_to_select",
-                                ),
+                                    # sync button
+                                    dbc.Button(
+                                        html.Span(
+                                            ["",
+                                             html.I(
+                                                 className="fas fa-arrow-down"),
+                                             html.Span(
+                                                 " Sync table with graph "),
+                                             html.I(
+                                                 className="fas fa-arrow-down")
+                                             ]),
+                                        color="primary",
+                                        size="md",
+                                        id="btn-sync"),
+                                    # button to add table contents to selection
+                                    dbc.Button([
+                                        html.Span(["", html.I(
+                                            className="fas fa-eye"),
+                                                   html.Span(
+                                                       " Add all visible to selection")])],
+                                        color="success",
+                                        id="button_add_legend_to_select",
+                                    ),
                                 ]),
-                        ]),
+                            ]),
                             dbc.Card([
                                 # table containing only selected taxa
                                 dash_table.DataTable(
@@ -300,7 +305,8 @@ class Layout:
                                              {"name": "e-value",
                                               "id": "bh_evalue",
                                               "type": "numeric",
-                                              "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
+                                              "format": Format(precision=3,
+                                                               scheme=Scheme.decimal_or_exponent)}],
                                     page_size=30,
                                     style_header={'textAlign': 'left'},
                                     style_table={
@@ -396,7 +402,8 @@ class Layout:
                                              {"name": "e-value",
                                               "id": "bh_evalue",
                                               "type": "numeric",
-                                              "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
+                                              "format": Format(precision=3,
+                                                               scheme=Scheme.decimal_or_exponent)}],
                                     style_header={'textAlign': 'left'},
                                     style_table={
                                         'overflowX': 'auto',
@@ -406,7 +413,6 @@ class Layout:
                                 ),
                             ], className="d-flex m-2"),
                         ], label="Selection Table and Tools"),
-
 
                     ], id="table-tabs"),
                 ]),
