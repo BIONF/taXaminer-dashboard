@@ -128,9 +128,10 @@ def show_variable_description(click_data):
     Input('variable-selection', 'value'),
     Input('table_selection', 'columns'),
     Input('legend_selection', 'columns'),
+    Input('variable-selection', 'options'),
     prevent_initial_call=True
 )
-def update_table_columns(selected_vars, sel_cols, legend_cols):
+def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     """
     Update the column visible in all tabels
     :param selected_vars: selection of dataframe columns to be shown
@@ -142,8 +143,14 @@ def update_table_columns(selected_vars, sel_cols, legend_cols):
     # select table columns
     columns = []
     # if selection has changed : build new column list
+    available_vars = my_dataset.get_selectable_variables(table_format=False)
     if selected_vars:
         for variable in selected_vars:
+
+            # catch variables from previous dataset not available in current
+            if variable not in available_vars:
+                continue
+
             variable_dict = dict(id=variable)
             if variable == "bh_evalue":
                 # truncate e-value

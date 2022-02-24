@@ -199,11 +199,12 @@ class DataSet:
                 my_rows.at[index, 'staxids'] = str(row['staxids']).split(';')[0]
             return my_rows
 
-    def get_selectable_variables(self):
+    def get_selectable_variables(self, table_format=True):
         """
         Get information on all available variables.
         To be used with dash dropdown selectors
-        :return: list of dicts
+        :param: table_format if false return only variable names
+        :return: list of dicts or if table_format list of strings
         """
         my_dataset = self.original_data
         variable_items = []
@@ -213,6 +214,12 @@ class DataSet:
             glossary = json.load(f)
 
         variables = my_dataset.columns.values.tolist()
+
+        # return only list of keys
+        if not table_format:
+            return variables
+
+        # build dicts
         for variable in variables:
             if str(variable) in glossary:
                 variable_items.append(
