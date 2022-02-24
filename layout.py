@@ -263,6 +263,56 @@ class Layout:
             dbc.Row([
                 dbc.Col(width=8, children=[
                     dbc.Tabs([
+
+                        dbc.Tab([
+                            dbc.Card([
+                                dbc.ButtonGroup([
+                                # sync button
+                                dbc.Button(
+                                    html.Span(
+                                        ["",
+                                         html.I(className="fas fa-arrow-down"),
+                                         html.Span(" Sync table with graph "),
+                                         html.I(className="fas fa-arrow-down")
+                                         ]),
+                                    color="primary",
+                                    size="md",
+                                    id="btn-sync"),
+                                # button to add table contents to selection
+                                dbc.Button([
+                                    html.Span(["", html.I(
+                                        className="fas fa-eye"),
+                                               html.Span(
+                                                   " Add all visible")])],
+                                    color="success",
+                                    id="button_add_legend_to_select",
+                                ),
+                                ]),
+                        ]),
+                            dbc.Card([
+                                # table containing only selected taxa
+                                dash_table.DataTable(
+                                    id='legend_selection',
+                                    columns=[{"name": "Gene Name",
+                                              "id": "g_name"},
+                                             {"name": "Taxon",
+                                              "id": "plot_label"},
+                                             {"name": "e-value",
+                                              "id": "bh_evalue",
+                                              "type": "numeric",
+                                              "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
+                                    page_size=30,
+                                    style_header={'textAlign': 'left'},
+                                    style_table={
+                                        'overflowX': 'auto',
+                                        'height': 'auto'},
+                                    style_cell={'textAlign': 'left'},
+                                    sort_action='native',
+                                    sort_mode='multi',
+                                ),
+                            ], className="m-2"),
+                        ], label="Plot Table"),
+
                         dbc.Tab([
                             dbc.Row([
                                 dbc.Col([
@@ -304,14 +354,7 @@ class Layout:
                                                 id='btn-reload',
                                                 n_clicks=0
                                             ),
-                                            dbc.Button([
-                                                html.Span(["", html.I(
-                                                    className="fas fa-eye"),
-                                                           html.Span(
-                                                               " Add all visible")])],
-                                                color="success",
-                                                id="button_add_legend_to_select",
-                                            ),
+
                                             dbc.Button([
                                                 html.Span(["", html.I(
                                                     className="fas fa-trash"),
@@ -325,7 +368,7 @@ class Layout:
                                                     ["", html.I(
                                                         className="fas fa-download"),
                                                      html.Span(" Download")])],
-                                                color="primary",
+                                                color="success",
                                                 id='btn-download'
                                             ),
                                         ], className="d-flex m-2 radio-group"
@@ -362,45 +405,9 @@ class Layout:
                                     page_size=30,
                                 ),
                             ], className="d-flex m-2"),
-                        ], label="Selection Tools"),
+                        ], label="Selection Table and Tools"),
 
-                        dbc.Tab([
-                            dbc.Card([
-                                # sync button
-                                dbc.Button(
-                                    html.Span(
-                                        ["",
-                                         html.I(className="fas fa-arrow-down"),
-                                         html.Span(" Sync table with graph "),
-                                         html.I(className="fas fa-arrow-down")
-                                         ]),
-                                    color="success",
-                                    size="md",
-                                    id="btn-sync"),
-                            ]),
-                            dbc.Card([
-                                # table containing only selected taxa
-                                dash_table.DataTable(
-                                    id='legend_selection',
-                                    columns=[{"name": "Gene Name",
-                                              "id": "g_name"},
-                                             {"name": "Taxon",
-                                              "id": "plot_label"},
-                                             {"name": "e-value",
-                                              "id": "bh_evalue",
-                                              "type": "numeric",
-                                              "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
-                                    page_size=30,
-                                    style_header={'textAlign': 'left'},
-                                    style_table={
-                                        'overflowX': 'auto',
-                                        'height': 'auto'},
-                                    style_cell={'textAlign': 'left'},
-                                    sort_action='native',
-                                    sort_mode='multi',
-                                ),
-                            ], className="m-2"),
-                        ], label="Plot Table"),
+
                     ], id="table-tabs"),
                 ]),
                 dbc.Col([
