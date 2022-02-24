@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import required_functionalities as rf
 import re
@@ -216,4 +217,29 @@ class DataSet:
                 my_rows.at[index, 'staxids'] = str(row['staxids']).split(';')[0]
             return my_rows
 
+    def get_selectable_variables(self):
+        """
+        Get information on all available variables.
+        To be used with dash dropdown selectors
+        :return: list of dicts
+        """
+        my_dataset = self.original_data
+        variable_items = []
+
+        # glossary data
+        with open("./static/glossary.json") as f:
+            glossary = json.load(f)
+
+        variables = my_dataset.columns.values.tolist()
+        for variable in variables:
+            if str(variable) in glossary:
+                variable_items.append(
+                    {"label": glossary[str(variable)]['short'],
+                     "value": str(variable),
+                     "title": glossary[str(variable)]['details']})
+            else:
+                variable_items.append(
+                    {"label": str(variable), "value": str(variable)})
+
+        return variable_items
 

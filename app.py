@@ -116,7 +116,6 @@ def show_variable_description(click_data):
 
     my_dot = click_data['points'][0]['customdata'][0]
 
-
     if not my_dot:
         return "No matching data"
     else:
@@ -356,6 +355,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('summary', 'value'),
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
+    Output('variable-selection', 'options'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
@@ -374,7 +374,6 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     global my_dataset
     global path
-
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
@@ -520,7 +519,10 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     # update legend / selection / view flag
     my_fig.layout.uirevision = not update_layout
 
-    return my_fig, summary, contribution_fig, scree_fig
+    # variable selector
+    variables = my_dataset.get_selectable_variables()
+
+    return my_fig, summary, contribution_fig, scree_fig, variables
 
 
 @app.callback(

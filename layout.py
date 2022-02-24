@@ -13,12 +13,8 @@ class Layout:
         :return: dash.Layout component
         """
 
-
         # initial table variables
         variable_items = []
-
-        with open("./static/glossary.json") as f:
-            glossary = json.load(f)
 
         # variable selection diamond data
         taxonomic_hits_vars = []
@@ -35,20 +31,6 @@ class Layout:
                 label = col
             taxonomic_hits_vars.append({"label": col, "value": col})
             taxonomic_cols_initial.append({"name": label, "id": col})
-
-        # TODO Check Glossary use in callback content
-        # select & plot table
-        #variables = my_dataset.get_data_original().columns.values.tolist()
-        #for variable in variables:
-        #    if str(variable) in glossary:
-        #        variable_items.append(
-        #            {"label": glossary[str(variable)]['short'],
-        #
-        #             "value": str(variable),
-        #             "title": glossary[str(variable)]['details']})
-        #    else:
-        #        variable_items.append(
-        #            {"label": str(variable), "value": str(variable)})
 
         # colorscales
         try:
