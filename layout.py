@@ -5,20 +5,16 @@ from dash.dash_table.Format import Format, Scheme
 
 
 class Layout:
-    def get_layout(self, dropdowns, my_dataset):
+    def get_layout(self, dropdowns):
         """
         Builds an returns a layout
         :param dropdowns: Dropdown options for dataset selection
         :param scatter_test: scatterplot
-        :param my_dataset: initial dataset
         :return: dash.Layout component
         """
 
         # initial table variables
         variable_items = []
-
-        with open("./static/glossary.json") as f:
-            glossary = json.load(f)
 
         # variable selection diamond data
         taxonomic_hits_vars = []
@@ -35,18 +31,6 @@ class Layout:
                 label = col
             taxonomic_hits_vars.append({"label": col, "value": col})
             taxonomic_cols_initial.append({"name": label, "id": col})
-
-        # select & plot table
-        variables = my_dataset.get_data_original().columns.values.tolist()
-        for variable in variables:
-            if str(variable) in glossary:
-                variable_items.append(
-                    {"label": glossary[str(variable)]['short'],
-                     "value": str(variable),
-                     "title": glossary[str(variable)]['details']})
-            else:
-                variable_items.append(
-                    {"label": str(variable), "value": str(variable)})
 
         # colorscales
         try:
@@ -95,8 +79,7 @@ class Layout:
                                                     dcc.Dropdown(
                                                         id='dataset_select',
                                                         options=dropdowns,
-                                                        value=dropdowns[0].get(
-                                                            'value')
+                                                        placeholder="No Dataset selected"
                                                     )
                                                 ], className="m-2"),
                                                 dbc.Card([
@@ -407,8 +390,6 @@ class Layout:
                                               "id": "bh_evalue",
                                               "type": "numeric",
                                               "format": Format(precision=3, scheme=Scheme.decimal_or_exponent)}],
-                                    data=my_dataset.get_data_original().to_dict(
-                                        'records'),
                                     page_size=30,
                                     style_header={'textAlign': 'left'},
                                     style_table={

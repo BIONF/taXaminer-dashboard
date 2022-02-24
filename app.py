@@ -40,21 +40,20 @@ for file in os.listdir(base_path):
         datasets.append(d + "/")
         dropdowns.append({'label': d.split("/")[-1], 'value': d + "/"})
 print("Datasets", datasets)
-my_dataset = ds.DataSet(datasets[0])
-path = datasets[0]
 
-# creating a dictionary of the legend. Values indicate the visibility
-list_of_labels = my_dataset.get_data_original()['plot_label'].tolist()
-label_dictionary = dict.fromkeys(list_of_labels, True)
-del label_dictionary['Unassigned']
-legend_order = list(label_dictionary.keys())
+# data set globals
+path = None
+my_dataset = ds.DataSet()
+
+list_of_labels = []
+label_dictionary = {}
+legend_order = {}
 
 # load glossary once
 with open("./static/glossary.json") as f:
     glossary = json.load(f)
 
 # Global Settings
-hover_data = ['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment']
 is_select_mode = False
 is_remove_mode = False
 recent_click_data = None
@@ -69,7 +68,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
 app.title = "MILTS"
 
 my_layout = layout.Layout()
-app.layout = my_layout.get_layout(dropdowns, my_dataset)
+app.layout = my_layout.get_layout(dropdowns)
 
 
 @app.callback(
@@ -83,6 +82,10 @@ def print_seq_data(hover_data, search_data):
     :param search_data:
     :return:
     """
+    global path
+    if not path:
+        raise PreventUpdate
+
     if not hover_data:
         return "Hover of a data point to select it"
         # Allow user search
@@ -91,7 +94,6 @@ def print_seq_data(hover_data, search_data):
     else:
         # fetch protID from hover data
         my_dot = hover_data['points'][0]['customdata'][3]
-    global path
     seq = milts_files.get_protein_record(my_dot, path)
     if not seq:
         return "No matching Sequence data"
@@ -113,7 +115,6 @@ def show_variable_description(click_data):
         return "Click on a data point to get a short description of the variable"
 
     my_dot = click_data['points'][0]['customdata'][0]
-
 
     if not my_dot:
         return "No matching data"
@@ -197,6 +198,10 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
     global recent_select_data
     global last_selection
     global glossary
+
+    global path
+    if not path:
+        raise PreventUpdate
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     # scatter matrix select
@@ -350,6 +355,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('summary', 'value'),
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
+    Output('variable-selection', 'options'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
@@ -365,9 +371,9 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     :param dot_size size of the plot dots.
     :return: New values for UI Components
     """
-    global hover_data
-    global path
+
     global my_dataset
+    global path
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
@@ -379,12 +385,18 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     # only reload the .csv if the path has changed
     if new_path != path:
         my_dataset = ds.DataSet(new_path)
+        path = new_path
+
+    if not path:
+        raise PreventUpdate
+
     data = my_dataset.get_data_original()
 
     # legend selection
     global label_dictionary, legend_order
     label_dictionary = dict.fromkeys(data['plot_label'].tolist(), True)
-    del label_dictionary['Unassigned']
+    if 'Unassigned' in label_dictionary:
+        del label_dictionary['Unassigned']
     legend_order = list(label_dictionary.keys())
 
     # e-value filter
@@ -392,7 +404,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
-                           color='plot_label', hover_data=hover_data,
+                           color='plot_label', hover_data=['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment'],
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID', 'bh_evalue'])
     # keep existing camera position.
@@ -401,11 +413,11 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     my_fig.update_traces(marker=dict(size=dot_size))
 
-    hover_template = "<extra>%{customdata[5]} <br> " \
-                     "<extra>%{customdata[1]}</extra>"\
-                     "Best hit: %{customdata[2]} <br>" \
+    hover_template = "%{customdata[5]} <br> " \
+                     "%{customdata[1]} <br>"\
+                     "<extra>Best hit: %{customdata[2]} <br>" \
                      "Best hit e-value: %{customdata[4]} <br>" \
-                     "Taxonomic assignment: %{customdata[6]} <br>"
+                     "Taxonomic assignment: %{customdata[6]} <br></extra>"
     my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
@@ -504,13 +516,13 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
         summary = "File summary.txt not found"
     summary = "".join(summary)
 
-    # update reference path
-    path = new_path
-
     # update legend / selection / view flag
     my_fig.layout.uirevision = not update_layout
 
-    return my_fig, summary, contribution_fig, scree_fig
+    # variable selector
+    variables = my_dataset.get_selectable_variables()
+
+    return my_fig, summary, contribution_fig, scree_fig, variables
 
 
 @app.callback(

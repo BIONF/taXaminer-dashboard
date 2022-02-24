@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import required_functionalities as rf
 
@@ -6,7 +7,7 @@ class DataSet:
     """
     Represents a loaded dataset and supports selection
     """
-    def __init__(self, path):
+    def __init__(self, path=None):
         # column names according to the diamond documentation
         taxonomic_hits_rows = ['qseqid', 'sseqid', 'pident', 'length',
                                'mismatch', 'gapopen', 'qstart', 'qend',
@@ -21,21 +22,38 @@ class DataSet:
                                  'sscinames': str}
 
         # read data
-        self.original_data = pd.read_csv(
-            path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
+        if path:
+            self.original_data = pd.read_csv(path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
 
-        # fetch taxonomic hits, this may take a while
-        try:
-            self.taxonomic_hits = pd.read_csv(path + 'taxonomic_hits.txt',
-                                              header=None,
-                                              encoding='unicode_escape',
-                                              sep='\t',
-                                              names=taxonomic_hits_rows,
-                                              dtype=taxonomic_hits_dtypes,
-                                              skip_blank_lines=True)
-        except ValueError:
+            # fetch taxonomic hits, this may take a while
+            try:
+                self.taxonomic_hits = pd.read_csv(path + 'taxonomic_hits.txt',
+                                                  header=None,
+                                                  encoding='unicode_escape',
+                                                  sep='\t',
+                                                  names=taxonomic_hits_rows,
+                                                  dtype=taxonomic_hits_dtypes,
+                                                  skip_blank_lines=True)
+            except ValueError:
+                self.taxonomic_hits = None
+                print("Failed to read taxonomic_hits.txt, the file might be corrupted!")
+
+        else:
+            # emtpy data for taxonomic_hits
             self.taxonomic_hits = None
-            print("Failed to read taxonomic_hits.txt, the file might be corrupted!")
+            # emtpy standard dataframe
+            self.original_data = pd.DataFrame(data=[], columns=['g_name', 'c_name', 'c_num_of_genes', 'c_len',
+                                            'c_pct_assemby_len','c_genelenm', 'c_genelensd', 'c_cov_0', 'c_covsd_0',
+                                            'c_covdev_0','c_genecovm_0', 'c_genecovsd_0', 'c_pearson_r', 'c_pearson_p',
+                                            'c_gc_cont', 'c_gcdev', 'g_len', 'g_lendev_c', 'g_lendev_o', 'g_abspos',
+                                            'g_terminal', 'g_single', 'g_cov_0', 'g_covsd_0', 'g_covdev_c_0',
+                                            'g_covdev_o_0', 'g_pearson_r_o', 'g_pearson_p_o', 'g_pearson_r_c',
+                                            'g_pearson_p_c', 'g_gc_cont', 'g_gcdev_c', 'g_gcdev_o', 'Dim.1',
+                                            'Dim.2', 'Dim.3', 'protID', 'lcaID', 'lca', 'best_hitID', 'best_hit',
+                                            'bh_evalue', 'corrected_lca', 'taxon_assignment', 'plot_label'])
+
+
+
 
         # init selection keys
         self.selection_keys = set()
@@ -181,4 +199,29 @@ class DataSet:
                 my_rows.at[index, 'staxids'] = str(row['staxids']).split(';')[0]
             return my_rows
 
+    def get_selectable_variables(self):
+        """
+        Get information on all available variables.
+        To be used with dash dropdown selectors
+        :return: list of dicts
+        """
+        my_dataset = self.original_data
+        variable_items = []
+
+        # glossary data
+        with open("./static/glossary.json") as f:
+            glossary = json.load(f)
+
+        variables = my_dataset.columns.values.tolist()
+        for variable in variables:
+            if str(variable) in glossary:
+                variable_items.append(
+                    {"label": glossary[str(variable)]['short'],
+                     "value": str(variable),
+                     "title": glossary[str(variable)]['details']})
+            else:
+                variable_items.append(
+                    {"label": str(variable), "value": str(variable)})
+
+        return variable_items
 
