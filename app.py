@@ -685,6 +685,20 @@ def update_diamond_columns(selected_vars):
         columns.append({"name": variable, "id": variable})
     return columns
 
+app.clientside_callback(
+    """
+    function( value){
+    // Copy the chosen value from dataset_startup_selec to dataset_select
+    // :param value: selected dataset
+    // :return: tuple with zero to hide the modal and value chosen dataset
+    return [false, value]
+    }
+    """,
+    Output("mod1", "is_open"),
+    Output("dataset_select", "value"),
+    Input("dataset_startup_select", "value"),
+    prevent_initial_call=True)
+
 
 if __name__ == "__main__":
     app.run_server(host='127.0.0.1', port='8050', debug=True)
