@@ -1,4 +1,5 @@
 import os
+import re
 import time
 
 import dash
@@ -104,7 +105,7 @@ def print_seq_data(hover_data, search_data):
 @app.callback(
     Output('variable-info', 'value'),
     Input('contribution', 'clickData'))
-def show_variable_description(click_data):
+def show_variable_description_pca(click_data):
     """
     gives a description to each of the variables when their point is clicked in the Graph
     :param click_data:
@@ -156,11 +157,13 @@ def update_table_columns(selected_vars, sel_cols, legend_cols, options):
                 # truncate e-value
                 variable_dict['format'] = Format(precision=2,
                                                  scheme=Scheme.decimal_or_exponent)
-                variable_dict['type'] = "numeric"
+            variable_dict['type'] = "numeric"
+
+            clean_name, my_number = my_dataset.clean_trailing_indices(variable)
 
             # use human-readable column names
-            if str(variable) in glossary:
-                var_name = glossary[str(variable)]['short']
+            if clean_name in glossary:
+                var_name = glossary[clean_name]['short'] + " " + my_number
                 variable_dict['name'] = var_name
             else:
                 variable_dict['name'] = str(variable)
@@ -445,9 +448,11 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     # PCA plot
     details_list = []
     for i in labels_pca:
-        if i in glossary:
-            labels_pca[labels_pca.index(i)] = glossary[i]['short']
-            details_list.append(glossary[i]["details"])
+        clean_name, my_number = my_dataset.clean_trailing_indices(i)
+
+        if clean_name in glossary:
+            labels_pca[labels_pca.index(i)] = glossary[clean_name]['short'] + " " + my_number
+            details_list.append(glossary[clean_name]["details"])
         else:
             details_list.append("")
 

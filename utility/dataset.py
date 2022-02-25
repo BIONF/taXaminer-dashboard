@@ -1,4 +1,5 @@
 import json
+import re
 import pandas as pd
 import required_functionalities as rf
 
@@ -51,9 +52,6 @@ class DataSet:
                                             'g_pearson_p_c', 'g_gc_cont', 'g_gcdev_c', 'g_gcdev_o', 'Dim.1',
                                             'Dim.2', 'Dim.3', 'protID', 'lcaID', 'lca', 'best_hitID', 'best_hit',
                                             'bh_evalue', 'corrected_lca', 'taxon_assignment', 'plot_label'])
-
-
-
 
         # init selection keys
         self.selection_keys = set()
@@ -221,14 +219,33 @@ class DataSet:
 
         # build dicts
         for variable in variables:
-            if str(variable) in glossary:
+            clean_name, my_number = self.clean_trailing_indices(variable)
+
+            if clean_name in glossary:
                 variable_items.append(
-                    {"label": glossary[str(variable)]['short'],
+                    {"label": str(glossary[clean_name]['short']) + " " + my_number,
                      "value": str(variable),
-                     "title": glossary[str(variable)]['details']})
+                     "title": glossary[clean_name]['details']})
             else:
                 variable_items.append(
                     {"label": str(variable), "value": str(variable)})
 
         return variable_items
+
+    def clean_trailing_indices(self, variable_name):
+        """
+        Separates the trailing indices of variables
+        :param variable_name: Name of the variable (string)
+        :return: tuple of name, index
+        """
+        my_number = re.findall(r"\d+", variable_name)
+        number_str = ""
+        if len(my_number) > 0:
+            number_str = str(my_number[0])
+
+        # remove index
+        clean_name = re.sub(r"\d+", "", variable_name)
+
+        return clean_name, number_str
+
 

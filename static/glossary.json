@@ -27,24 +27,24 @@
     "short": "gene length stand. deviation",
     "details": "standard deviation of the gene lengths in the set of genes annotated on the given contig"
   },
-  "c_cov_0": {
-    "short": "mean read coverage",
+  "c_cov_": {
+    "short": "mean read coverage (contig)",
     "details": "mean read coverage of the given contig"
   },
-  "c_covsd_0": {
+  "c_covsd_": {
     "short": "standard deviation of read coverage",
     "details": "standard deviation of read coverage along the given contig"
   },
-  "c_covdev_0": {
+  "c_covdev_": {
     "short": "deviation from mean assembly coverage",
     "details": "extent to which 'c_cov' deviates from the mean assembly coverage, in units of total assembly coverage SD"
   },
-  "c_genecovm_0": {
+  "c_genecovm_": {
     "short": "mean read coverage",
     "details": "mean read coverage in the set of genes annotated on the given contig"
   },
-  "c_genecovsd_0": {
-    "short": "standard deviation (read coverage)",
+  "c_genecovsd_": {
+    "short": "standard deviation (read coverage) (contig)",
     "details": "standard deviation of the read coverage in the set of genes annotated on the given contig"
   },
   "c_pearson_r": {
@@ -87,19 +87,19 @@
     "short": "single gene classifier",
     "details": "classifier of single genes (1 if the given gene is the only gene annotated on its contig, 0 if not)"
   },
-  "g_cov_0": {
-    "short": "mean read coverage",
+  "g_cov_": {
+    "short": "mean read coverage (genes)",
     "details": "mean read coverage of the given gene"
   },
-  "g_covsd_0": {
-    "short": "eviation of the read coverage",
+  "g_covsd_": {
+    "short": "deviation of the read coverage (gene)",
     "details": "standard deviation of the read coverage along the given gene"
   },
-  "g_covdev_c_0": {
+  "g_covdev_c_": {
     "short": "mean gene cov. dev.",
     "details": "extent to which 'g_cov' deviates from the corresponding 'c_genecovm', in units of 'c_genecovsd'"
   },
-  "g_covdev_o_0": {
+  "g_covdev_o_": {
     "short": "gene cov. dev. from avg. gene dev.",
     "details": "extent to which 'g_cov' deviates from the average gene coverage in the assembly, in units of the coverage SD over the complete set of genes in this assembly"
   },
