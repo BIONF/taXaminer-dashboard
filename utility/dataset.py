@@ -37,7 +37,7 @@ class DataSet:
                                                   skip_blank_lines=True)
             except ValueError:
                 self.taxonomic_hits = None
-                print("Failed to read taxonomic_hits.txt, the file might be corrupted!")
+                print("[WARN] Failed to read taxonomic_hits.txt")
 
         else:
             # emtpy data for taxonomic_hits

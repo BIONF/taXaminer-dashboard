@@ -27,10 +27,13 @@ def write_protein_sequences(genes, path):
     """
     as_sequences = []
 
-    with open(path + "/proteins.faa") as handle:
-        for record in SeqIO.parse(handle, "fasta"):
-            if record.name in genes:
-                as_sequences.append(record)
+    try:
+        with open(path + "/proteins.faa") as handle:
+            for record in SeqIO.parse(handle, "fasta"):
+                if record.name in genes:
+                    as_sequences.append(record)
+    except FileNotFoundError:
+        print("[WARN] proteins.faa not found")
 
     with open(path + "/selected_proteins.fasta", "w") as handle:
         SeqIO.write(as_sequences, handle, "fasta")

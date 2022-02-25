@@ -312,9 +312,9 @@ class Layout:
                                     # button to add table contents to selection
                                     dbc.Button([
                                         html.Span(["", html.I(
-                                            className="fas fa-eye"),
+                                            className="fas fa-plus-circle"),
                                                    html.Span(
-                                                       " Add all visible to selection")])],
+                                                       " Add table to selection")])],
                                         color="success",
                                         id="button_add_legend_to_select",
                                     ),
