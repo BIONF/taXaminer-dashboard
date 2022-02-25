@@ -47,6 +47,32 @@ class Layout:
             }]}
 
         layout = dbc.Container(fluid=True, children=[
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Welcome to MILTS dashboard"), close_button=True),
+                    dbc.ModalBody(children=[
+                        dbc.Card(children=[
+                            dbc.CardHeader(id="mod1-head-select",
+                                           children="Select a MILTS dataset from list."),
+                            dcc.Dropdown(
+                                id='dataset_startup_select',
+                                options=dropdowns,
+                                placeholder="No dataset selected",
+                                clearable=False
+                            )
+                        ]),
+
+                        dbc.Tooltip(
+                            "All records that are stored in default data location (./Data) should be available.",
+                            target="mod1-head-select",
+                            placement="right"),
+
+                    ], className="d-grid gap-4")
+                ],
+                id="mod1",
+                centered=True,
+                is_open=True,
+            ),
             dbc.NavbarSimple(
                 brand="MILTS",
                 brand_href="#",
