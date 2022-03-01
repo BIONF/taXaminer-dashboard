@@ -228,9 +228,11 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
         if click_scat_data and click_scat_data != recent_click_scat_data:
             recent_click_scat_data = click_scat_data
             if is_remove_mode:
-                my_dataset.unselect(click_scat_data['points'][0]['customdata'][1])
+                my_dataset.unselect(
+                    click_scat_data['points'][0]['customdata'][1])
             else:
-                my_dataset.select(click_scat_data['points'][0]['customdata'][1])
+                my_dataset.select(
+                    click_scat_data['points'][0]['customdata'][1])
 
     # plot click
     if click_data and click_data != recent_click_data:
@@ -269,7 +271,7 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
     if gene_data.size != 0:
         output_text += "Label: " + gene_data['plot_label'].item() + "\n"
         output_text += "Gene: " + gene_data['g_name'].item() + \
-                       " | Scaffold: " + gene_data['c_name'].item() + "\n"
+                       " | Contig: " + gene_data['c_name'].item() + "\n"
         output_text += "Best hit: " + str(gene_data['best_hit'].item()) + \
                        " | e-value: " + str(gene_data['bh_evalue'].item())
     else:
@@ -420,7 +422,10 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
-                           color='plot_label', hover_data=['plot_label', 'g_name', 'best_hit', 'bh_evalue', 'taxon_assignment'],
+                           color='plot_label',
+                           hover_data=['plot_label', 'g_name', 'best_hit',
+                                       'bh_evalue', 'taxon_assignment',
+                                       'c_name'],
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID', 'bh_evalue'])
     # keep existing camera position.
@@ -430,10 +435,11 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_fig.update_traces(marker=dict(size=dot_size))
 
     hover_template = "%{customdata[5]} <br> " \
-                     "%{customdata[1]} <br>"\
+                     "%{customdata[1]} <br>" \
                      "<extra>Best hit: %{customdata[2]} <br>" \
                      "Best hit e-value: %{customdata[4]} <br>" \
-                     "Taxonomic assignment: %{customdata[6]} <br></extra>"
+                     "Taxonomic assignment: %{customdata[6]} <br>" \
+                     "Contig name: %{customdata[7]} <br></extra>"
     my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
@@ -685,6 +691,7 @@ def update_diamond_columns(selected_vars):
         columns.append({"name": variable, "id": variable})
     return columns
 
+
 app.clientside_callback(
     """
     function( value){
@@ -698,7 +705,6 @@ app.clientside_callback(
     Output("dataset_select", "value"),
     Input("dataset_startup_select", "value"),
     prevent_initial_call=True)
-
 
 if __name__ == "__main__":
     app.run_server(host='127.0.0.1', port='8050', debug=True)
