@@ -1,11 +1,6 @@
 import os
-import re
-import time
-
 import dash
 import dash_bootstrap_components as dbc
-import math
-
 from dash.dash_table.Format import Format, Scheme
 from dash.exceptions import PreventUpdate
 
@@ -13,9 +8,16 @@ import layout
 from dash import callback_context, dcc
 from dash.dependencies import Input, Output, State
 import plotly.express as px
+
+# math
+import math
 import pandas as pd
+import numpy as np
+
+# local dependencies
 from utility import data_io as milts_files
 from utility import dataset as ds
+from utility import transformation
 import required_functionalities as rf
 import json
 
@@ -443,8 +445,30 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
-    my_fig.update_layout(legend=dict(title=dict(text='Taxa'),
-                                     itemsizing='constant'))
+    # add Demo Button
+    my_fig.update_layout(
+        legend=dict(title=dict(text='Taxa'), itemsizing='constant'),
+        updatemenus=[dict(
+            type='buttons',
+            y=1, x=1, xanchor='right', yanchor='bottom',
+            pad=dict(t=10, r=10),
+            buttons=[dict(label='Auto-rotate',
+                          method='animate',
+                          args=[None, dict(frame=dict(duration=5, redraw=True),
+                                           transition=dict(duration=0),
+                                           fromcurrent=True,
+                                           mode='immediate')]
+                          )]
+        )])
+
+    # add autorotate frames
+    frames = []
+    for t in np.arange(0, 6.26, 0.1):
+        # camera coordinates of next step
+        x, y, z = transformation.rotate_z(-1.25, 2, 0.5, -t)
+        frames.append(
+            go.Frame(layout=dict(scene_camera_eye=dict(x=x, y=y, z=z))))
+    my_fig.frames = frames
 
     # contribution of variables
     contribution_data = pd.read_csv(
@@ -466,7 +490,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     pc2 = contribution_data.get("PC2")
     pc3 = contribution_data.get("PC3")
     pc_len = (len(pc3) if len(pc3) < len(pc1) else len(pc1)) if len(pc1) < len(pc2) else \
-             (len(pc3) if len(pc3) < len(pc2) else len(pc2))
+        (len(pc3) if len(pc3) < len(pc2) else len(pc2))
 
     contribution_fig = px.scatter_3d(contribution_data,
                                      title="Contribution of variables",
@@ -573,8 +597,8 @@ def updateScatterMatrix(value, scat_3d, legend):
                                      custom_data=['selected', 'g_name'])
 
     scatter_side.update_traces(hovertemplate='%{customdata[1]}<br>%{xaxis.title.text}=%{x}<br>%{yaxis.title.text}=%{'
-                                             'y}<extra></extra>',
-                               showlegend=False)
+                      'y}<extra></extra>',
+        showlegend=False)
 
     # Override random plotly colors, because they going crazy.
     for it in range(0, len(scatter_side.data)):
