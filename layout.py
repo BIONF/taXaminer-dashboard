@@ -318,6 +318,19 @@ class Layout:
                                         color="success",
                                         id="button_add_legend_to_select",
                                     ),
+                                    dbc.Button(
+                                        html.Span(
+                                            ["",
+                                             html.I(
+                                                 className="fas fa-minus-circle"),
+                                             html.Span(
+                                                 " Reset Legend "),
+                                             html.I(
+                                                 className="fas fa-minus-circle")
+                                             ]),
+                                        color="danger",
+                                        size="md",
+                                        id="reset-legend"),
                                 ]),
                             ]),
                             dbc.Card([
