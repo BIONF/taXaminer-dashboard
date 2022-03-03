@@ -374,7 +374,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
-    Input('slider-dot-size', 'value'),
+    State('slider-dot-size', 'value'),
     State('scatter3d', 'relayoutData')
 )
 def update_dataframe(value, new_path, color_root, dot_size, relayout):
@@ -597,8 +597,8 @@ def updateScatterMatrix(value, scat_3d, legend):
                                      custom_data=['selected', 'g_name'])
 
     scatter_side.update_traces(hovertemplate='%{customdata[1]}<br>%{xaxis.title.text}=%{x}<br>%{yaxis.title.text}=%{'
-                      'y}<extra></extra>',
-        showlegend=False)
+                                             'y}<extra></extra>',
+                               showlegend=False)
 
     # Override random plotly colors, because they going crazy.
     for it in range(0, len(scatter_side.data)):
@@ -753,6 +753,68 @@ app.clientside_callback(
     Output("dataset_select", "value"),
     Input("dataset_startup_select", "value"),
     prevent_initial_call=True)
+
+app.clientside_callback("""
+    function(fig, restyle, toggle_dot_auto){
+        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+
+         var scatDiv = document.getElementById('scatter3d')
+
+        if(scatDiv == undefined || scatDiv.children == undefined || scatDiv.children.length < 2){return undefined;}  
+        if(fig === undefined || fig['data'] === undefined){return undefined;}
+        if(triggered.includes('scatter3d.restyleData')){
+        if(restyle !== undefined && restyle[0] !== undefined && restyle[0]['visible'] === undefined){return undefined;}
+        }
+
+        var list_visible = []
+        var data_size = 0
+        for (it = 0; it < fig['data'].length; it++){
+            if(fig['data'][it]['visible'] === undefined || fig['data'][it]['visible'] == true){  
+                data_size += fig['data'][it]['x'].length
+                list_visible.push(fig['data'][it]['name'])
+            }
+        }
+        
+        // prevent math error and check auto dot size active 
+        if (data_size <= 0 || !toggle_dot_auto){
+            return list_visible;
+        }
+        
+        var new_size = Math.round((800*data_size)/Math.pow(data_size, 1.12))/100;
+        var update = {'marker.size': new_size};
+        window.Plotly.restyle(scatDiv.children[1], update);
+
+        return list_visible;
+    }
+    """,
+                        Output('taxa_info1', 'data'),
+                        Input('scatter3d', 'figure'),
+                        Input('scatter3d', 'restyleData'),
+                        Input('toggle-dot-size', 'value'))
+
+app.clientside_callback("""
+    function(toggle_dot_auto, dot_size){
+        var scatDiv = document.getElementById('scatter3d')
+        if(scatDiv == undefined || scatDiv.children == undefined || scatDiv.children.length < 2){return "";}  
+        
+        if(!toggle_dot_auto){
+            var update = {'marker.size': dot_size};
+            window.Plotly.restyle(scatDiv.children[1], update);
+        }
+        return "";
+    }
+    """,
+                        Output('dummy-1', 'children'),
+                        Input('toggle-dot-size', 'value'),
+                        Input('slider-dot-size', 'value'))
+
+
+@app.callback(
+    Output('slider-dot-size', 'disabled'),
+    Input('toggle-dot-size', 'value'))
+def disableDotSizeSlider(toggle_dot_auto):
+    return toggle_dot_auto
+
 
 if __name__ == "__main__":
     app.run_server(host='127.0.0.1', port='8050', debug=True)
