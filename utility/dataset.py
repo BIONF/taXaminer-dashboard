@@ -56,6 +56,9 @@ class DataSet:
         # init selection keys
         self.selection_keys = set()
 
+        # coverage variables
+        self.c_covs, self.g_covs = self.filter_cov_variables()
+
     def get_data_original(self):
         """
         Returns the unmodified dataframe as read from the .csv file on init
@@ -270,3 +273,30 @@ class DataSet:
         data.to_csv(path + '/selection.csv', index=False)
 
         return path + 'selection.csv'
+
+    def filter_cov_variables(self):
+        """
+        Filter coverage columns (there might be multiple with varying indices)
+        :return: tuple of lists of contig covs, gene covs
+        """
+
+        original_data = self.original_data
+        cov_cols = []
+        gene_cols = []
+        for col in original_data.columns:
+            # contig coverages
+            if str(col).startswith("c_cov_"):
+                cov_cols.append(str(col))
+
+            # gene coverages
+            if str(col).startswith("g_cov_"):
+                gene_cols.append(str(col))
+
+        return cov_cols, gene_cols
+
+    def get_cov_variables(self):
+        """
+        Find the variable keys of coverage information cols
+        :return: tuple of lists of contig covs, gene covs
+        """
+        return self.c_covs, self.g_covs

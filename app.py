@@ -279,25 +279,17 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
                        "\n\n"
 
         """Display gene and contig coverage information"""
-        cov_cols = []
-        gene_cols = []
-        for col in my_dataset.get_data_original().columns:
-            # contig coverages
-            if str(col).startswith("c_cov_"):
-                cov_cols.append(str(col))
-
-            # gene coverages
-            if str(col).startswith("g_cov_"):
-                gene_cols.append(str(col))
+        cov_cols, gene_cols = my_dataset.get_cov_variables()
 
         # convert coverage values to text
+        output_text += "Mean read Coverages:\n"
         for i in range(len(cov_cols)):
             # contig coverage
-            output_text += "Contig coverage [" + str(i) + "]:"
+            output_text += "Contig [" + str(i) + "]:"
             output_text += " " + str(gene_data[cov_cols[i]].item()) + "\n"
 
             # gene coverage
-            output_text += "Gene coverage [" + str(i) + "]:"
+            output_text += "Gene [" + str(i) + "]:"
             output_text += " " + str(gene_data[gene_cols[i]].item()) + "\n"
 
     else:
