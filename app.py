@@ -275,21 +275,30 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
         output_text += "Gene: " + gene_data['g_name'].item() + \
                        " | Contig: " + gene_data['c_name'].item() + "\n"
         output_text += "Best hit: " + str(gene_data['best_hit'].item()) + \
-                       " | e-value: " + str(gene_data['bh_evalue'].item()) + "\n"
-        contig_cov = "c_cov_"
-        gene_cov = "g_cov_"
-        counter = 0
+                       " | e-value: " + str(gene_data['bh_evalue'].item()) + \
+                       "\n\n"
 
-        while contig_cov + str(counter) in gene_data.keys():
-            output_text += ("Contig coverage " + str(counter)) + ": " +\
-                            str(gene_data[contig_cov + str(counter)].item()) + "\n"
-            counter += 1
+        """Display gene and contig coverage information"""
+        cov_cols = []
+        gene_cols = []
+        for col in my_dataset.get_data_original().columns:
+            # contig coverages
+            if str(col).startswith("c_cov_"):
+                cov_cols.append(str(col))
 
-        counter = 0
-        while gene_cov + str(counter) in gene_data.keys():
-            output_text += ("Gene coverage " + str(counter)) + ": " +\
-                            str(gene_data[gene_cov + str(counter)].item()) + "\n"
-            counter += 1
+            # gene coverages
+            if str(col).startswith("g_cov_"):
+                gene_cols.append(str(col))
+
+        # convert coverage values to text
+        for i in range(len(cov_cols)):
+            # contig coverage
+            output_text += "Contig coverage [" + str(i) + "]:"
+            output_text += " " + str(gene_data[cov_cols[i]].item()) + "\n"
+
+            # gene coverage
+            output_text += "Gene coverage [" + str(i) + "]:"
+            output_text += " " + str(gene_data[gene_cols[i]].item()) + "\n"
 
     else:
         output_text = "No matching genes found"
@@ -442,7 +451,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
                            color='plot_label',
                            hover_data=['plot_label', 'g_name', 'best_hit',
                                        'bh_evalue', 'taxon_assignment',
-                                       'c_name', 'c_cov_0'],
+                                       'c_name'],
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID', 'bh_evalue'])
     # keep existing camera position.
