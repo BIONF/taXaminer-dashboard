@@ -391,9 +391,10 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
     Input('slider-dot-size', 'value'),
+    Input('reset-legend','n_clicks'),
     State('scatter3d', 'relayoutData')
 )
-def update_dataframe(value, new_path, color_root, dot_size, relayout):
+def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayout):
     """
     Update dataset and apply filters
     :param value: value of e-value slider
@@ -585,6 +586,11 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
 
     # variable selector
     variables = my_dataset.get_selectable_variables()
+
+    # reset the legend dictionary
+    if changed_id == reset_legend:
+        for i in label_dictionary:
+            label_dictionary[i] = False
 
     # set n_clicks = 0 to toggle plot table reload
     return my_fig, summary, contribution_fig, scree_fig, variables, 0
