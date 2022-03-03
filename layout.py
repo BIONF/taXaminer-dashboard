@@ -2,7 +2,7 @@ import json
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table
 from dash.dash_table.Format import Format, Scheme
-
+import dash_daq as daq
 
 class Layout:
     def get_layout(self, dropdowns):
@@ -47,7 +47,9 @@ class Layout:
             }]}
 
         layout = dbc.Container(fluid=True, children=[
-            dbc.Modal(
+            html.Div(id="dummy-1", hidden=True),
+            dcc.Store(id="taxa_info1"),
+            dbc.Modal(  # startup dataset selection card
                 [
                     dbc.ModalHeader(dbc.ModalTitle("Welcome to MILTS dashboard"), close_button=True),
                     dbc.ModalBody(children=[
@@ -257,9 +259,17 @@ class Layout:
             dbc.Row([
                 dbc.Col([
                     dbc.Row([
+                        # Toggle auto dot size
+                        dbc.Col(children=[
+                            html.Span("Auto dot size"),
+                            daq.ToggleSwitch(
+                                id='toggle-dot-size',
+                                value=True
+                            )
+                        ], width=1),
                         # Dot size selection
                         dbc.Col(children=[
-                            html.Span("Dot size (px)"),
+                            html.Span("Manual dot size (px)"),
                             dcc.Slider(id='slider-dot-size',
                                        min=1,
                                        max=8,
