@@ -275,7 +275,22 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
         output_text += "Gene: " + gene_data['g_name'].item() + \
                        " | Contig: " + gene_data['c_name'].item() + "\n"
         output_text += "Best hit: " + str(gene_data['best_hit'].item()) + \
-                       " | e-value: " + str(gene_data['bh_evalue'].item())
+                       " | e-value: " + str(gene_data['bh_evalue'].item()) + "\n"
+        contig_cov = "c_cov_"
+        gene_cov = "g_cov_"
+        counter = 0
+
+        while contig_cov + str(counter) in gene_data.keys():
+            output_text += ("Contig coverage " + str(counter)) + ": " +\
+                            str(gene_data[contig_cov + str(counter)].item()) + "\n"
+            counter += 1
+
+        counter = 0
+        while gene_cov + str(counter) in gene_data.keys():
+            output_text += ("Gene coverage " + str(counter)) + ": " +\
+                            str(gene_data[gene_cov + str(counter)].item()) + "\n"
+            counter += 1
+
     else:
         output_text = "No matching genes found"
 
@@ -427,7 +442,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
                            color='plot_label',
                            hover_data=['plot_label', 'g_name', 'best_hit',
                                        'bh_evalue', 'taxon_assignment',
-                                       'c_name'],
+                                       'c_name', 'c_cov_0'],
                            custom_data=['taxa_color', 'g_name', 'best_hit',
                                         'protID', 'bh_evalue'])
     # keep existing camera position.
@@ -441,7 +456,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
                      "<extra>Best hit: %{customdata[2]} <br>" \
                      "Best hit e-value: %{customdata[4]} <br>" \
                      "Taxonomic assignment: %{customdata[6]} <br>" \
-                     "Contig name: %{customdata[7]} <br></extra>"
+                     "Contig name: %{customdata[7]} <br> </extra>"
     my_fig.update_traces(hovertemplate=hover_template)
     rf.SetCustomColorTraces(my_fig, 0)
 
