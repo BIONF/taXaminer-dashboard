@@ -248,4 +248,25 @@ class DataSet:
 
         return clean_name, number_str
 
+    def export_csv(self, cols, path):
+        """
+        Export the selection table to .csv
+        :param cols:
+        :param selection_keys:
+        :return:
+        """
+        original_data = self.original_data
 
+        # ensure out identifier is present
+        if 'g_name' not in cols:
+            cols.append('g_name')
+
+        # filter cols
+        data = original_data[original_data.columns.intersection(cols)]
+        # filter rows
+        data = data[data['g_name'].isin(list(self.selection_keys))]
+
+        # export .csv
+        data.to_csv(path + '/selection.csv', index=False)
+
+        return path + 'selection.csv'

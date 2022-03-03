@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 
 # local dependencies
-from utility import data_io as milts_files
+from utility import protein_io as milts_files
 from utility import dataset as ds
 from utility import transformation
 import required_functionalities as rf
@@ -696,6 +696,30 @@ def download(click_data):
     for key in key_list:
         prot_ids.append(my_dataset.get_protID(key))
     link = milts_files.write_protein_sequences(prot_ids, path)
+    return dcc.send_file(link)
+
+
+@app.callback(
+    Output("download-csv", "data"),
+    Input('btn-csv', 'n_clicks'),
+    Input('variable-selection', 'value'),
+    prevent_initial_call=True
+)
+def download_csv(click_data, cols):
+    """
+    Download a section of the pandas dataframe as defined by the selection
+    table
+    :param click_data:
+    :return: dcc.sendfile()
+    """
+
+    # don't trigger a download if only the variable selection has changed
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    if changed_id == 'variable-selection.value':
+        return None
+
+    # build download link
+    link = my_dataset.export_csv(cols, path)
     return dcc.send_file(link)
 
 

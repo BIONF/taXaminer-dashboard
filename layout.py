@@ -381,7 +381,7 @@ class Layout:
                                                     ["", html.I(
                                                         className="fas fa-upload"),
                                                      html.Span(
-                                                         " Load session")])],
+                                                         " Load")])],
                                                 color="primary",
                                                 id='btn-reload',
                                                 n_clicks=0
@@ -395,18 +395,38 @@ class Layout:
                                                 color="danger",
                                                 id="button_reset"
                                             ),
-                                            dbc.Button([
-                                                html.Span(
-                                                    ["", html.I(
-                                                        className="fas fa-download"),
-                                                     html.Span(" Download")])],
-                                                color="success",
-                                                id='btn-download'
-                                            ),
+
                                         ], className="d-flex m-2 radio-group"
                                                      " btn-block"),
-                                        dcc.Download(id="download-selection"),
+
                                     ]),
+                                ]),
+                                dbc.Col([
+                                    dbc.ButtonGroup([
+                                        dbc.Button([
+                                            html.Span(
+                                                ["", html.I(
+                                                    className="fas fa-download"),
+                                                 html.Span(" .fasta")])],
+                                            color="primary",
+                                            outline=True,
+                                            id='btn-download'
+                                        ),
+                                        dbc.Button([
+                                            html.Span(
+                                                ["", html.I(
+                                                    className="fas fa-download"),
+                                                 html.Span(
+                                                     " .csv")])],
+                                            color="primary",
+                                            outline=True,
+                                            id='btn-csv'
+                                        ),
+                                    ], className="d-flex m-2 radio-group"
+                                                 " btn-block"),
+                                    # download
+                                    dcc.Download(id="download-selection"),
+                                    dcc.Download(id="download-csv"),
                                 ]),
                                 dbc.Col([
                                     dbc.Row([
