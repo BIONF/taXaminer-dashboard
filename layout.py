@@ -487,10 +487,36 @@ class Layout:
                                 value=['g_name', 'plot_label', 'bh_evalue']
                             ),
                         ], label="Variables"),
-                        # Download Tab
+                        # External Tools Tab
                         dbc.Tab([
                             dbc.Card([
-                                dbc.CardHeader("BLAST"),
+                                dbc.CardHeader("External tools"),
+                                dbc.CardBody([
+                                    dbc.Button(
+                                        "NCBI Blast",
+                                        href="https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastp",
+                                        external_link=True,
+                                        color='primary',
+                                        target='_blank',
+                                        className='m-2'
+                                    ),
+                                    dbc.Button(
+                                        "HMMER",
+                                        href="https://www.ebi.ac.uk/Tools/hmmer/",
+                                        external_link=True,
+                                        color='primary',
+                                        target='_blank',
+                                        className='m-2'
+                                    ),
+                                    dbc.Button(
+                                        "CD-Search",
+                                        href="https://www.ncbi.nlm.nih.gov/Structure/cdd/wrpsb.cgi",
+                                        external_link=True,
+                                        color='primary',
+                                        target='_blank',
+                                        className='m-2'
+                                    ),
+                                ])
                             ], className="m-2"),
                         ], label="Tools")
                     ]),
