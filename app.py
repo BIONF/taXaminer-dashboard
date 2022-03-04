@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 
 # local dependencies
-from utility import protein_io as milts_files, required_functionalities as rf
+from utility import protein_io as taxaminer_files, required_functionalities as rf
 from utility import dataset as ds
 from utility import transformation
 import json
@@ -24,11 +24,11 @@ import plotly.graph_objs as go
 
 """
 DIRECTORY FORMAT:
-./data/<name of MILTS run>/gene_info
-./data/<name of MILTS run>/PCA_and_clustering
-./data/<name of MILTS run>/taxonomic_assignment
-./data/<name of MILTS run>/proteins.faa
-./data/<name of MILTS run>/taxonomic_hits.txt
+./data/<name of taXaminer run>/gene_info
+./data/<name of taXaminer run>/PCA_and_clustering
+./data/<name of taXaminer run>/taxonomic_assignment
+./data/<name of taXaminer run>/proteins.faa
+./data/<name of taXaminer run>/taxonomic_hits.txt
 """
 
 output_path = "./data/"
@@ -67,7 +67,7 @@ is_dataset_switch = False
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
                                                 dbc.icons.FONT_AWESOME])
-app.title = "MILTS"
+app.title = "taXaminer"
 
 my_layout = layout.Layout()
 app.layout = my_layout.get_layout(dropdowns)
@@ -96,7 +96,7 @@ def print_seq_data(hover_data, search_data):
     else:
         # fetch protID from hover data
         my_dot = hover_data['points'][0]['customdata'][3]
-    seq = milts_files.get_protein_record(my_dot, path)
+    seq = taxaminer_files.get_protein_record(my_dot, path)
     if not seq:
         return "No matching Sequence data"
     else:
@@ -722,7 +722,7 @@ def download(click_data):
     # replace by protIDs
     for key in key_list:
         prot_ids.append(my_dataset.get_protID(key))
-    link = milts_files.write_protein_sequences(prot_ids, path)
+    link = taxaminer_files.write_protein_sequences(prot_ids, path)
     return dcc.send_file(link)
 
 

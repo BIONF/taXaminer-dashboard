@@ -50,11 +50,11 @@ class Layout:
         layout = dbc.Container(fluid=True, children=[
             dbc.Modal(
                 [
-                    dbc.ModalHeader(dbc.ModalTitle("Welcome to MILTS dashboard"), close_button=True),
+                    dbc.ModalHeader(dbc.ModalTitle("Welcome to taXaminer"), close_button=True),
                     dbc.ModalBody(children=[
                         dbc.Card(children=[
                             dbc.CardHeader(id="mod1-head-select",
-                                           children="Select a MILTS dataset from list."),
+                                           children="Select a taXaminer dataset from list."),
                             dcc.Dropdown(
                                 id='dataset_startup_select',
                                 options=dropdowns,
@@ -75,7 +75,7 @@ class Layout:
                 is_open=True,
             ),
             dbc.NavbarSimple(
-                brand="MILTS",
+                brand="taXaminer",
                 brand_href="#",
                 color="primary",
                 dark=True,
