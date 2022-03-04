@@ -87,7 +87,7 @@ class DataSet:
         taxon_counts = dict(plot_data['plot_label'].value_counts())
         for index, row in plot_data.iterrows():
             new_label = row['plot_label'] + " (" + str(taxon_counts.get(row['plot_label'])) + ")"
-            plot_data.at[index, 'plot_label'] = new_label
+            plot_data.at[index, 'plot_label_v'] = new_label
         return plot_data
 
     def selected_merge(self, data=None):
