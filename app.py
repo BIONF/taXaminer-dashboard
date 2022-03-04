@@ -406,6 +406,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     if new_path != path:
         my_dataset = ds.DataSet(new_path)
         path = new_path
+        relayout = False
 
     if not path:
         raise PreventUpdate
@@ -760,6 +761,10 @@ app.clientside_callback(
     prevent_initial_call=True)
 
 app.clientside_callback("""
+    // Setting the automatic point size 
+    // :param fig scatter3d figure
+    // :param restyle scatter3d restyleData 
+    // :param toggle_dot_auto:  dot size mode switch bool
     function(fig, restyle, toggle_dot_auto){
         const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
          
@@ -798,6 +803,9 @@ app.clientside_callback("""
                         Input('toggle-dot-size', 'value'))
 
 app.clientside_callback("""
+    // Setting the manual point size
+    // :param toggle_dot_auto:  dot size mode switch bool
+    // :param dot_size: new dot size value form slider
     function(toggle_dot_auto, dot_size){
         var scatDiv = document.getElementById('scatter3d')
         if(scatDiv == undefined || scatDiv.children == undefined || scatDiv.children.length < 2){return "";}  
@@ -818,7 +826,30 @@ app.clientside_callback("""
     Output('slider-dot-size', 'disabled'),
     Input('toggle-dot-size', 'value'))
 def disableDotSizeSlider(toggle_dot_auto):
+    """
+    Just disable and enable manual dot size slider.
+    :param toggle_dot_auto:  dot size mode switch bool
+    :return: disable bool
+    """
     return toggle_dot_auto
+
+
+app.clientside_callback("""
+    function(lay, fig){
+        // Fix a sync camera issues between plotly an python dash. 
+        // :param lay is from dash plot relayoutData
+        // :param fig scatter3d figure
+        
+        var main_scat = document.getElementById('scatter3d')
+        if(fig !== undefined && fig['layout'] !== undefined && main_scat !== undefined && main_scat.children[1]._fullLayout !== undefined){            
+            fig['layout']['scene']['camera'] = main_scat.children[1]._fullLayout['scene']['camera']
+        }
+        return "";
+    }
+    """,
+                        Output('dummy-2', 'children'),
+                        Input('scatter3d', 'relayoutData'),
+                        State('scatter3d', 'figure'))
 
 
 if __name__ == "__main__":
