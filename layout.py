@@ -49,6 +49,7 @@ class Layout:
         layout = dbc.Container(fluid=True, children=[
             html.Div(id="dummy-1", hidden=True),
             dcc.Store(id="taxa_info1"),
+            dcc.Store(id="taxa_info2"),
             dbc.Modal(  # startup dataset selection card
                 [
                     dbc.ModalHeader(dbc.ModalTitle("Welcome to MILTS dashboard"), close_button=True),
