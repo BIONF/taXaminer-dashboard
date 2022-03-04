@@ -424,7 +424,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
-                           color='plot_label',
+                           color='plot_label_v',
                            hover_data=['plot_label', 'g_name', 'best_hit',
                                        'bh_evalue', 'taxon_assignment',
                                        'c_name'],
@@ -612,50 +612,48 @@ def updateScatterMatrix(value, scat_3d, legend):
 
 
 @app.callback(
+    Output('taxa_info2', 'data'),
+    Input('taxa_info1', 'data'))
+def callbackChainTaxa(data):
+    if data:
+        return data
+    else:
+        raise PreventUpdate
+
+
+@app.callback(
     Output('legend_selection', 'data'),
-    Input('scatter3d', 'restyleData'),
-    Input('btn-sync', 'n_clicks'),
-    Input('legend_selection', 'data')
-)
-def display_click_data(selectedData, n_clicks, curr_data):
+    Input('taxa_info2', 'data'),
+    State('evalue-slider', 'value'))
+def display_click_data(taxa_list, e_value):
     """
     function to update the table with the Taxa visble in plot
-    :param selectedData:
+    :param taxa_list: contains all visible taxa
     :return: updated dataset to build the table new according to the visible parts of the legend
     """
-
-    # init an empty table on dataset switch
     global is_dataset_switch
+    global my_dataset
+    global path
+
+    # there is no current data
+    if not path:
+        return None
+
+    # e-value filter
+    e_value = 1 * math.e ** (-e_value)
+    df_data = my_dataset.get_plot_data({'e-value': e_value})
+
+    # init an full table on dataset switch
     if is_dataset_switch:
         # toggle
         is_dataset_switch = False
-        return None
-
-    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-
-    if changed_id != 'btn-sync.n_clicks':
-        return curr_data
+        return df_data.to_dict('records')
 
     # removing error at the start of the program
-    if selectedData is None:
-        return my_dataset.get_data_original().to_dict('records')
+    if taxa_list is None:
+        return df_data.to_dict('records')
 
-    # updating the legend dictionary with the input
-    update_dict = dict(zip(selectedData[1], selectedData[0]["visible"]))
-    for i in update_dict:
-        if update_dict[i] == "legendonly":
-            label_dictionary[legend_order[i]] = False
-        else:
-            label_dictionary[legend_order[i]] = True
-
-    # assembling output
-    new_data = my_dataset.get_data_original().copy(deep=True)
-    new_data = new_data[new_data['plot_label'] != 'Unassigned']
-    for i in label_dictionary:
-        if not label_dictionary[i]:
-            new_data = new_data[new_data['plot_label'] != i]
-
-    return new_data.to_dict('records')
+    return df_data[df_data.plot_label_v.isin(taxa_list)].to_dict('records')
 
 
 @app.callback(
@@ -757,7 +755,7 @@ app.clientside_callback(
 app.clientside_callback("""
     function(fig, restyle, toggle_dot_auto){
         const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-
+         
          var scatDiv = document.getElementById('scatter3d')
 
         if(scatDiv == undefined || scatDiv.children == undefined || scatDiv.children.length < 2){return undefined;}  
