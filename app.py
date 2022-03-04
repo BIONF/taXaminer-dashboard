@@ -370,6 +370,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('contribution', 'figure'),
     Output('scree', 'figure'),
     Output('variable-selection', 'options'),
+    Output('btn-sync', 'n_clicks'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
@@ -570,7 +571,7 @@ def update_dataframe(value, new_path, color_root, dot_size, relayout):
     variables = my_dataset.get_selectable_variables()
 
     # set n_clicks = 0 to toggle plot table reload
-    return my_fig, summary, contribution_fig, scree_fig, variables
+    return my_fig, summary, contribution_fig, scree_fig, variables, 0
 
 
 @app.callback(
@@ -622,11 +623,13 @@ def callbackChainTaxa(data):
 
 @app.callback(
     Output('legend_selection', 'data'),
-    Input('taxa_info2', 'data'),
+    Input('btn-sync', 'n_clicks'),
+    State('taxa_info2', 'data'),
     State('evalue-slider', 'value'))
-def display_click_data(taxa_list, e_value):
+def display_click_data(clicks, taxa_list, e_value):
     """
     function to update the table with the Taxa visble in plot
+    :param clicks dash button n_clicks
     :param taxa_list: contains all visible taxa
     :return: updated dataset to build the table new according to the visible parts of the legend
     """
@@ -634,19 +637,24 @@ def display_click_data(taxa_list, e_value):
     global my_dataset
     global path
 
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    if changed_id != 'btn-sync.n_clicks':
+        raise PreventUpdate
+
     # there is no current data
     if not path:
+        return None
+
+    # init an empty table on dataset switch
+    if is_dataset_switch:
+        # toggle
+        is_dataset_switch = False
         return None
 
     # e-value filter
     e_value = 1 * math.e ** (-e_value)
     df_data = my_dataset.get_plot_data({'e-value': e_value})
-
-    # init an full table on dataset switch
-    if is_dataset_switch:
-        # toggle
-        is_dataset_switch = False
-        return df_data.to_dict('records')
 
     # removing error at the start of the program
     if taxa_list is None:
