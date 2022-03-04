@@ -212,6 +212,16 @@ class Layout:
                                                          'color': '#77b0b1'}}},
                                         className="m-2",
                                     ),
+                                    dcc.Textarea(
+                                        id='textarea-evalue',
+                                        value='1.0',
+                                        disabled=True,
+                                        style={'height': 30,
+                                               'width': 'fill',
+                                               "verticalAlign": "top",
+                                               'horizontalAlign': 'left'},
+                                        className='m-2'
+                                    ),
                                 ], className="m-2"),
                             ], label="Filter", className="m-2"),
                             dbc.Tab(label='PCA Data', children=[

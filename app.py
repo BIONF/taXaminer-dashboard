@@ -390,6 +390,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('scree', 'figure'),
     Output('variable-selection', 'options'),
     Output('btn-sync', 'n_clicks'),
+    Output('textarea-evalue', 'value'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
@@ -595,7 +596,7 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
             label_dictionary[i] = False
 
     # set n_clicks = 0 to toggle plot table reload
-    return my_fig, summary, contribution_fig, scree_fig, variables, 0
+    return my_fig, summary, contribution_fig, scree_fig, variables, 0, str(value)
 
 
 @app.callback(
