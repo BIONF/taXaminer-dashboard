@@ -23,6 +23,7 @@ class Layout:
                                 'length', 'mismatch', 'gapopen', 'qstart',
                                 'qend', 'sstart', 'send', 'staxids']
 
+        # table index for diamond hits
         for col in taxonomic_hits_names:
             # one exception
             if col == "sscinames":
@@ -63,7 +64,7 @@ class Layout:
                         ]),
 
                         dbc.Tooltip(
-                            "All records that are stored in default data location (./Data) should be available.",
+                            "All records that are stored in default data location (./data) should be available.",
                             target="mod1-head-select",
                             placement="right"),
 

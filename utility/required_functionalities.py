@@ -1,9 +1,9 @@
+"""This file is like a short engine.
+The main purpose is to store all required functions, to prevent the app.py
+to be filled with spam """
+
 import math
 import numpy as np
-
-"""This file is like a short engine. 
-The main purpose is to store all required functions, to prevent the app.py 
-to be filled with spam """
 
 
 """------------------------------------------------------------"""
@@ -21,7 +21,6 @@ def rgbStrToVec(color):
                          int("0x" + color[3:5], 16),
                          int("0x" + color[5:7], 16)])
     except ... as error:
-        # TODO Exchange print with common log function.
         print("Error: required_functionalities->rgbStrToVec():", error)
         return np.array([0, 0, 0])
 
@@ -47,7 +46,6 @@ def rgbVecToStr(c_vec):
                str(hex(c_vec[1]))[2:4].zfill(2) + \
                str(hex(c_vec[2]))[2:4].zfill(2)
     except ... as error:
-        # TODO Exchange print with common log function.
         print("Error: required_functionalities->rgbVecToStr()", error)
         return "#000000"
 
@@ -104,7 +102,6 @@ def qualitativeColours(n, color_root=None):
                     break
 
         except ... as e:
-            # TODO Exchange print with common log function.
             print("Error: required_functionalities->qualitiveColours: ", e)
             color_root = defauld_root
     else:
@@ -113,7 +110,7 @@ def qualitativeColours(n, color_root=None):
     return colorRampPalette(color_root, n)
 
 
-def SetCustomColorTraces(fig, custom_d_index):
+def set_custom_color_traces(fig, custom_d_index):
     """ Manual update_traces() function for python dash figure,
         witch is simply write a custom variable into the marker color.
         This function is just a specific bug solution and only usable with
@@ -127,7 +124,6 @@ def SetCustomColorTraces(fig, custom_d_index):
         try:
             trace['marker']['color'] = trace['customdata'][0][custom_d_index]
         except ... as error:
-            # TODO Exchange print with common log function.
             print("Error: required_functionalities->updateColorTraces:", error)
 
 

@@ -15,10 +15,9 @@ import pandas as pd
 import numpy as np
 
 # local dependencies
-from utility import protein_io as milts_files
+from utility import protein_io as milts_files, required_functionalities as rf
 from utility import dataset as ds
 from utility import transformation
-import required_functionalities as rf
 import json
 
 import plotly.graph_objs as go
@@ -191,14 +190,18 @@ def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks'),
 )
-def select(click_data, click_scat_data, select_data, selection_table_cell, search_data,
-           button_reset, button_add_legend_to_select, reload):
+def select(click_data, click_scat_data, select_data, selection_table_cell,
+           search_data, button_reset, button_add_legend_to_select, reload):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
+    :param click_scat_data: scatterplot matrix click data
     :param select_data: select data from scatter matrix
     :param selection_table_cell: cell index from table of selected sequences
     :param search_data: value of the searchbar
+    :param button_reset: clickdata of the 'reset legend' button
+    :param button_add_legend_to_select: clickdata of 'select visible' button
+    :param reload: clickdata of the 'reload save' button
     :return: updated content for textareas and tables
     """
 
@@ -356,9 +359,9 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
 def update_selection_mode(button_add, button_remove, button_neutral):
     """
     Decide whether to add or remove data points to selection or do nothing
-    :param button_add:
-    :param button_remove:
-    :param button_neutral:
+    :param button_add: clickdata of '+' button
+    :param button_remove: clickdata of 'neutral' button
+    :param button_neutral: clickdata of '-' button
     :return: bool values to disable certain buttons
     """
     global is_select_mode
@@ -391,7 +394,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
     Input('slider-dot-size', 'value'),
-    Input('reset-legend','n_clicks'),
+    Input('reset-legend', 'n_clicks'),
     State('scatter3d', 'relayoutData')
 )
 def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayout):
@@ -399,8 +402,10 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
     Update dataset and apply filters
     :param value: value of e-value slider
     :param new_path: path to dataset
-    :param color_root a color hex string, which define the pole label color.
-    :param dot_size size of the plot dots.
+    :param color_root: a color hex string, which define the pole label color.
+    :param dot_size: size of the plot dots.
+    :param reset_legend: clickdata of the 'reset legend' button
+    :param relayout: custom data from scatterplot
     :return: New values for UI Components
     """
 
@@ -460,7 +465,7 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
                      "Taxonomic assignment: %{customdata[6]} <br>" \
                      "Contig name: %{customdata[7]} <br> </extra>"
     my_fig.update_traces(hovertemplate=hover_template)
-    rf.SetCustomColorTraces(my_fig, 0)
+    rf.set_custom_color_traces(my_fig, 0)
 
     # add Demo Button
     my_fig.update_layout(
@@ -519,19 +524,16 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
                                      height=550)
 
     # get points
-    point_list_x = []
-    point_list_y = []
-    point_list_z = []
+    point_list_x = point_list_y = point_list_z = []
 
+    # populate lists
     for x in range(pc_len):
         point_list_x.append(pc1[x])
         point_list_y.append(pc2[x])
         point_list_z.append(pc3[x])
 
     # calc x,y,z
-    vector_list_x = []
-    vector_list_y = []
-    vector_list_z = []
+    vector_list_x = vector_list_y = vector_list_z = []
     for i in range(pc_len):
         vector_list_x.append(0)
         vector_list_x.append(point_list_x[i])
@@ -639,11 +641,14 @@ def updateScatterMatrix(value, scat_3d, legend):
     Input('btn-sync', 'n_clicks'),
     Input('legend_selection', 'data')
 )
-def display_click_data(selectedData, n_clicks, curr_data):
+def display_click_data(selected_data, btn_sync_clicks, curr_data):
     """
     function to update the table with the Taxa visble in plot
-    :param selectedData:
-    :return: updated dataset to build the table new according to the visible parts of the legend
+    :param selected_data: selected point from scatterplot
+    :param btn_sync_clicks: clickdata from 'reset legend' button
+    :param curr_data:
+    :return: updated dataset to build the table new according to the visible
+    parts of the legend
     """
 
     # init an empty table on dataset switch
@@ -659,11 +664,11 @@ def display_click_data(selectedData, n_clicks, curr_data):
         return curr_data
 
     # removing error at the start of the program
-    if selectedData is None:
+    if selected_data is None:
         return my_dataset.get_data_original().to_dict('records')
 
     # updating the legend dictionary with the input
-    update_dict = dict(zip(selectedData[1], selectedData[0]["visible"]))
+    update_dict = dict(zip(selected_data[1], selected_data[0]["visible"]))
     for i in update_dict:
         if update_dict[i] == "legendonly":
             label_dictionary[legend_order[i]] = False

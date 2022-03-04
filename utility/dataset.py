@@ -1,7 +1,8 @@
 import json
 import re
 import pandas as pd
-import required_functionalities as rf
+from configparser import ConfigParser
+from utility import required_functionalities as rf
 
 
 class DataSet:
@@ -9,11 +10,13 @@ class DataSet:
     Represents a loaded dataset and supports selection
     """
     def __init__(self, path=None):
+        # config file
+        config = ConfigParser()
+        config.read("./static/config.ini")
+
         # column names according to the diamond documentation
-        taxonomic_hits_rows = ['qseqid', 'sseqid', 'pident', 'length',
-                               'mismatch', 'gapopen', 'qstart', 'qend',
-                               'sstart', 'send', 'evalue', 'bitscore',
-                               'staxids', 'sscinames']
+        taxonomic_hits_cols = config['Dataframe']['taxonomic_hits_cols']
+        taxonomic_hits_cols = taxonomic_hits_cols.split(",")
         # manually assert datatypes to save computing time
         taxonomic_hits_dtypes = {'qseqid': str, 'sseqid': str, 'pident': float,
                                  'lenght': int, 'mismatch': int,
@@ -24,15 +27,17 @@ class DataSet:
 
         # read data
         if path:
-            self.original_data = pd.read_csv(path + "taxonomic_assignment/gene_table_taxon_assignment.csv")
+            main_file = config['Files']['taxon_assignment']
+            taxonomic_hits_file = config['Files']['taxonomic_hits']
+            self.original_data = pd.read_csv(path + main_file)
 
             # fetch taxonomic hits, this may take a while
             try:
-                self.taxonomic_hits = pd.read_csv(path + 'taxonomic_hits.txt',
+                self.taxonomic_hits = pd.read_csv(path + taxonomic_hits_file,
                                                   header=None,
                                                   encoding='unicode_escape',
                                                   sep='\t',
-                                                  names=taxonomic_hits_rows,
+                                                  names=taxonomic_hits_cols,
                                                   dtype=taxonomic_hits_dtypes,
                                                   skip_blank_lines=True)
             except ValueError:
@@ -43,15 +48,8 @@ class DataSet:
             # emtpy data for taxonomic_hits
             self.taxonomic_hits = None
             # emtpy standard dataframe
-            self.original_data = pd.DataFrame(data=[], columns=['g_name', 'c_name', 'c_num_of_genes', 'c_len',
-                                            'c_pct_assemby_len','c_genelenm', 'c_genelensd', 'c_cov_0', 'c_covsd_0',
-                                            'c_covdev_0','c_genecovm_0', 'c_genecovsd_0', 'c_pearson_r', 'c_pearson_p',
-                                            'c_gc_cont', 'c_gcdev', 'g_len', 'g_lendev_c', 'g_lendev_o', 'g_abspos',
-                                            'g_terminal', 'g_single', 'g_cov_0', 'g_covsd_0', 'g_covdev_c_0',
-                                            'g_covdev_o_0', 'g_pearson_r_o', 'g_pearson_p_o', 'g_pearson_r_c',
-                                            'g_pearson_p_c', 'g_gc_cont', 'g_gcdev_c', 'g_gcdev_o', 'Dim.1',
-                                            'Dim.2', 'Dim.3', 'protID', 'lcaID', 'lca', 'best_hitID', 'best_hit',
-                                            'bh_evalue', 'corrected_lca', 'taxon_assignment', 'plot_label'])
+            base_cols = config['Dataframe']['base_cols'].split(",")
+            self.original_data = pd.DataFrame(data=[], columns=base_cols)
 
         # init selection keys
         self.selection_keys = set()
