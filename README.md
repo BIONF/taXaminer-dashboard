@@ -1,4 +1,4 @@
-# taXanimer Dashboard
+# taXaminer Dashboard
 ``v1.0``
 
 The program contained in this repository provides a interactive representation of the output of [taXaminer](https://github.com/BIONF/taXaminer).
@@ -23,7 +23,7 @@ Please refer to the project wiki for further information.
 # Compatibility
 
 ## taXaminer datasets
-The current version incorporates the changes of commit [a424195](https://github.com/BIONF/taXaminer/commit/a424195509a2bc425ed7012c26ce056b565e7254). If any problems arise please open a new issue using the label [(taXanimer compatibility)](https://github.com/BIONF/taXaminer-dashboard/labels/taXanimer%20compatibility).
+The current version incorporates the changes of commit [a424195](https://github.com/BIONF/taXaminer/commit/a424195509a2bc425ed7012c26ce056b565e7254). If any problems arise please open a new issue using the label [(taXaminer compatibility)](https://github.com/BIONF/taXaminer-dashboard/labels/taXanimer%20compatibility).
 
 ## Browser compatibility
 This tool is developed and tested on the following browsers:
