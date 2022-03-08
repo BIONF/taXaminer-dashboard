@@ -131,9 +131,13 @@
     "short": "deviation from GC content (GC SD)",
     "details": "extent to which 'g_gc_cont' deviates from the mean GC content in overall gene set, in units of GC SD over the complete set of genes in this assembly"
   },
+  "fasta_header": {
+    "short": "fasta header identifier",
+    "details": "header in FASTA file that was matched to gene ID and corresponding sequence is used for taxonomic assignment"
+  },
   "protID": {
-    "short": "protein ID",
-    "details": "protein ID / header in FASTA file that was matched to gene ID and corresponding sequence is used for taxonomic assignment"
+    "short": "protein id identifier",
+    "details": "id in FASTA file that was matched to gene ID and corresponding sequence is used for taxonomic assignment"
   },
   "lcaID": {
     "short": "LCA NCBI taxon ID",

@@ -165,21 +165,26 @@ class DataSet:
         """
         self.selection_keys = set()
 
-    def get_protID(self, gene_name):
+    def get_fasta_header(self, gene_name):
         """
-        Fetch the protID associated with a given g_name
-        :param gene_name:
+        Fetch the fasta_header identifier associated with a given g_name
+        :param gene_name: value of col gene_name from dataframe
         :return:
         """
         original_data = self.original_data
-        my_id = original_data.loc[original_data['g_name'] == gene_name][
-            'protID'].item()
+
+        # 'protID' was renamed to 'fasta_header' in taXanimer commit a424195
+        if 'protID' in original_data.columns:
+            # preserve backwards compatibility
+            my_id = original_data.loc[original_data['g_name'] == gene_name]['protID'].item()
+        else:
+            my_id = original_data.loc[original_data['g_name'] == gene_name]['fasta_header'].item()
         return my_id
 
-    def get_taxonomic_hits(self, protID):
+    def get_taxonomic_hits(self, fasta_header):
         """
-        Fetch rows from taxonomic_hits.txt matching the protID
-        :param protID: protID observed
+        Fetch rows from taxonomic_hits.txt matching the fasta_header
+        :param fasta_header: fasta_header observed
         :return: pandas dataframe
         """
         taxonomic_hits = self.taxonomic_hits
@@ -187,7 +192,7 @@ class DataSet:
             return None
         else:
             # return a proper copy (avoid SettingWithCopyWarning)
-            my_rows = taxonomic_hits[taxonomic_hits['qseqid'] == protID].copy(deep=True)
+            my_rows = taxonomic_hits[taxonomic_hits['qseqid'] == fasta_header].copy(deep=True)
 
             # show only the first hit
             for index, row in my_rows.iterrows():

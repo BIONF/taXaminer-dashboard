@@ -94,7 +94,7 @@ def print_seq_data(hover_data, search_data):
     if search_data:
         my_dot = search_data
     else:
-        # fetch protID from hover data
+        # fetch fasta_header from hover data
         my_dot = hover_data['points'][0]['customdata'][3]
     seq = taxaminer_files.get_protein_record(my_dot, path)
     if not seq:
@@ -254,7 +254,7 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
                     'g_name']
             if cell != last_selection:
                 my_point = cell
-                prot_id = my_dataset.get_protID(my_point)
+                prot_id = my_dataset.get_fasta_header(my_point)
         except IndexError:
             pass
 
@@ -446,13 +446,20 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
     value = 1 * math.e ** (-value)
     my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
 
+    # 'protID' was renamed to 'fasta_header' in taXanimer commit a424195
+    if 'protID' in my_dataset.get_data_original().columns:
+        # preserve backwards compatibility
+        header_name = 'protID'
+    else:
+        header_name = 'fasta_header'
+
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
                            color='plot_label',
                            hover_data=['plot_label', 'g_name', 'best_hit',
                                        'bh_evalue', 'taxon_assignment',
                                        'c_name'],
                            custom_data=['taxa_color', 'g_name', 'best_hit',
-                                        'protID', 'bh_evalue'])
+                                        header_name, 'bh_evalue'])
     # keep existing camera position.
     if relayout and 'scene.camera' in relayout:
         my_fig.update_layout(scene_camera=relayout['scene.camera'])
@@ -713,17 +720,17 @@ def print_link(click_data):
 )
 def download(click_data):
     """
-    Complie a new .fasta file of as-sequences based on the users selection
+    Compile a new .fasta file of as-sequences based on the users selection
     :param click_data: data from the corresponding button
     :return: dcc.send_file
     """
-    prot_ids = []
+    fasta_header = []
     key_list = list(my_dataset.selection_keys)
 
-    # replace by protIDs
+    # replace by headers
     for key in key_list:
-        prot_ids.append(my_dataset.get_protID(key))
-    link = taxaminer_files.write_protein_sequences(prot_ids, path)
+        fasta_header.append(my_dataset.get_fasta_header(key))
+    link = taxaminer_files.write_protein_sequences(fasta_header, path)
     return dcc.send_file(link)
 
 
