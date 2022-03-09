@@ -190,9 +190,11 @@ def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks'),
+    State('taxa_info2', 'data'),
+    State('evalue-slider', 'value')
 )
 def select(click_data, click_scat_data, select_data, selection_table_cell, search_data,
-           button_reset, button_add_legend_to_select, reload):
+           button_reset, button_add_legend_to_select, reload, taxa_list, e_value):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -290,14 +292,17 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
         my_dataset.reset_selection()
 
     # add visible taxa to selection
-    if changed_id == 'button_add_legend_to_select.n_clicks':
-        new_data = my_dataset.get_data_original().copy(deep=True)
-        new_data = new_data[new_data['plot_label'] != 'Unassigned']
-        for i in label_dictionary:
-            if not label_dictionary[i]:
-                new_data = new_data[new_data['plot_label'] != i]
+    if changed_id == 'button_add_legend_to_select.n_clicks' and not is_dataset_switch:
+        # e-value filter
+        e_value = 1 * math.e ** (-e_value)
+        df_data = my_dataset.get_plot_data({'e-value': e_value})
 
-        genes_list = new_data['g_name'].tolist()
+        # removing error at the start of the program
+        if taxa_list is None:
+             genes_list = df_data['g_name'].tolist()
+        else:
+            genes_list = df_data[df_data.plot_label_v.isin(taxa_list)]['g_name'].tolist()
+
         for i in genes_list:
             my_dataset.select(i)
 
