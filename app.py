@@ -18,6 +18,7 @@ import numpy as np
 from utility import protein_io as taxaminer_files, required_functionalities as rf
 from utility import dataset as ds
 from utility import transformation
+import required_functionalities as rf
 import json
 
 import plotly.graph_objs as go
@@ -189,9 +190,11 @@ def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks'),
+    State('taxa_info2', 'data'),
+    State('evalue-slider', 'value')
 )
-def select(click_data, click_scat_data, select_data, selection_table_cell,
-           search_data, button_reset, button_add_legend_to_select, reload):
+def select(click_data, click_scat_data, select_data, selection_table_cell, search_data,
+           button_reset, button_add_legend_to_select, reload, taxa_list, e_value):
     """
     Common function for different modes of selection from UI elements
     :param click_data: click data from scatterplot
@@ -309,14 +312,17 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
         my_dataset.reset_selection()
 
     # add visible taxa to selection
-    if changed_id == 'button_add_legend_to_select.n_clicks':
-        new_data = my_dataset.get_data_original().copy(deep=True)
-        new_data = new_data[new_data['plot_label'] != 'Unassigned']
-        for i in label_dictionary:
-            if not label_dictionary[i]:
-                new_data = new_data[new_data['plot_label'] != i]
+    if changed_id == 'button_add_legend_to_select.n_clicks' and not is_dataset_switch:
+        # e-value filter
+        e_value = 1 * math.e ** (-e_value)
+        df_data = my_dataset.get_plot_data({'e-value': e_value})
 
-        genes_list = new_data['g_name'].tolist()
+        # removing error at the start of the program
+        if taxa_list is None:
+             genes_list = df_data['g_name'].tolist()
+        else:
+            genes_list = df_data[df_data.plot_label_v.isin(taxa_list)]['g_name'].tolist()
+
         for i in genes_list:
             my_dataset.select(i)
 
@@ -394,7 +400,7 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
-    Input('slider-dot-size', 'value'),
+    State('slider-dot-size', 'value'),
     Input('reset-legend', 'n_clicks'),
     State('scatter3d', 'relayoutData')
 )
@@ -429,6 +435,7 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
     if new_path != path:
         my_dataset = ds.DataSet(new_path)
         path = new_path
+        relayout = False
 
     if not path:
         raise PreventUpdate
@@ -454,7 +461,7 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
         header_name = 'fasta_header'
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
-                           color='plot_label',
+                           color='plot_label_v',
                            hover_data=['plot_label', 'g_name', 'best_hit',
                                        'bh_evalue', 'taxon_assignment',
                                        'c_name'],
@@ -629,8 +636,8 @@ def updateScatterMatrix(value, scat_3d, legend):
                                      custom_data=['selected', 'g_name'])
 
     scatter_side.update_traces(hovertemplate='%{customdata[1]}<br>%{xaxis.title.text}=%{x}<br>%{yaxis.title.text}=%{'
-                      'y}<extra></extra>',
-        showlegend=False)
+                                             'y}<extra></extra>',
+                               showlegend=False)
 
     # Override random plotly colors, because they going crazy.
     for it in range(0, len(scatter_side.data)):
@@ -644,53 +651,55 @@ def updateScatterMatrix(value, scat_3d, legend):
 
 
 @app.callback(
+    Output('taxa_info2', 'data'),
+    Input('taxa_info1', 'data'))
+def callbackChainTaxa(data):
+    if data:
+        return data
+    else:
+        raise PreventUpdate
+
+
+@app.callback(
     Output('legend_selection', 'data'),
-    Input('scatter3d', 'restyleData'),
     Input('btn-sync', 'n_clicks'),
-    Input('legend_selection', 'data')
-)
-def display_click_data(selected_data, btn_sync_clicks, curr_data):
+    State('taxa_info2', 'data'),
+    State('evalue-slider', 'value'))
+def display_click_data(clicks, taxa_list, e_value):
     """
     function to update the table with the Taxa visble in plot
-    :param selected_data: selected point from scatterplot
-    :param btn_sync_clicks: clickdata from 'reset legend' button
-    :param curr_data:
-    :return: updated dataset to build the table new according to the visible
-    parts of the legend
+    :param clicks dash button n_clicks
+    :param taxa_list: contains all visible taxa
+    :return: updated dataset to build the table new according to the visible parts of the legend
     """
+    global is_dataset_switch
+    global my_dataset
+    global path
+
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    if changed_id != 'btn-sync.n_clicks':
+        raise PreventUpdate
+
+    # there is no current data
+    if not path:
+        return None
 
     # init an empty table on dataset switch
-    global is_dataset_switch
     if is_dataset_switch:
         # toggle
         is_dataset_switch = False
         return None
 
-    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-
-    if changed_id != 'btn-sync.n_clicks':
-        return curr_data
+    # e-value filter
+    e_value = 1 * math.e ** (-e_value)
+    df_data = my_dataset.get_plot_data({'e-value': e_value})
 
     # removing error at the start of the program
-    if selected_data is None:
-        return my_dataset.get_data_original().to_dict('records')
+    if taxa_list is None:
+        return df_data.to_dict('records')
 
-    # updating the legend dictionary with the input
-    update_dict = dict(zip(selected_data[1], selected_data[0]["visible"]))
-    for i in update_dict:
-        if update_dict[i] == "legendonly":
-            label_dictionary[legend_order[i]] = False
-        else:
-            label_dictionary[legend_order[i]] = True
-
-    # assembling output
-    new_data = my_dataset.get_data_original().copy(deep=True)
-    new_data = new_data[new_data['plot_label'] != 'Unassigned']
-    for i in label_dictionary:
-        if not label_dictionary[i]:
-            new_data = new_data[new_data['plot_label'] != i]
-
-    return new_data.to_dict('records')
+    return df_data[df_data.plot_label_v.isin(taxa_list)].to_dict('records')
 
 
 @app.callback(
@@ -788,6 +797,98 @@ app.clientside_callback(
     Output("dataset_select", "value"),
     Input("dataset_startup_select", "value"),
     prevent_initial_call=True)
+
+app.clientside_callback("""
+    // Setting the automatic point size 
+    // :param fig scatter3d figure
+    // :param restyle scatter3d restyleData 
+    // :param toggle_dot_auto:  dot size mode switch bool
+    function(fig, restyle, toggle_dot_auto){
+        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+         
+         var scatDiv = document.getElementById('scatter3d')
+
+        if(scatDiv == undefined || scatDiv.children == undefined || scatDiv.children.length < 2){return undefined;}  
+        if(fig === undefined || fig['data'] === undefined){return undefined;}
+        if(triggered.includes('scatter3d.restyleData')){
+        if(restyle !== undefined && restyle[0] !== undefined && restyle[0]['visible'] === undefined){return undefined;}
+        }
+
+        var list_visible = []
+        var data_size = 0
+        for (it = 0; it < fig['data'].length; it++){
+            if(fig['data'][it]['visible'] === undefined || fig['data'][it]['visible'] == true){  
+                data_size += fig['data'][it]['x'].length
+                list_visible.push(fig['data'][it]['name'])
+            }
+        }
+        
+        // prevent math error and check auto dot size active 
+        if (data_size <= 0 || !toggle_dot_auto){
+            return list_visible;
+        }
+        
+        var new_size = Math.round((800*data_size)/Math.pow(data_size, 1.12))/100;
+        var update = {'marker.size': new_size};
+        window.Plotly.restyle(scatDiv.children[1], update);
+
+        return list_visible;
+    }
+    """,
+                        Output('taxa_info1', 'data'),
+                        Input('scatter3d', 'figure'),
+                        Input('scatter3d', 'restyleData'),
+                        Input('toggle-dot-size', 'value'))
+
+app.clientside_callback("""
+    // Setting the manual point size
+    // :param toggle_dot_auto:  dot size mode switch bool
+    // :param dot_size: new dot size value form slider
+    function(toggle_dot_auto, dot_size){
+        var scatDiv = document.getElementById('scatter3d')
+        if(scatDiv == undefined || scatDiv.children == undefined || scatDiv.children.length < 2){return "";}  
+        
+        if(!toggle_dot_auto){
+            var update = {'marker.size': dot_size};
+            window.Plotly.restyle(scatDiv.children[1], update);
+        }
+        return "";
+    }
+    """,
+                        Output('dummy-1', 'children'),
+                        Input('toggle-dot-size', 'value'),
+                        Input('slider-dot-size', 'value'))
+
+
+@app.callback(
+    Output('slider-dot-size', 'disabled'),
+    Input('toggle-dot-size', 'value'))
+def disableDotSizeSlider(toggle_dot_auto):
+    """
+    Just disable and enable manual dot size slider.
+    :param toggle_dot_auto:  dot size mode switch bool
+    :return: disable bool
+    """
+    return toggle_dot_auto
+
+
+app.clientside_callback("""
+    function(lay, fig){
+        // Fix a sync camera issues between plotly an python dash. 
+        // :param lay is from dash plot relayoutData
+        // :param fig scatter3d figure
+        
+        var main_scat = document.getElementById('scatter3d')
+        if(fig !== undefined && fig['layout'] !== undefined && main_scat !== undefined && main_scat.children[1]._fullLayout !== undefined){            
+            fig['layout']['scene']['camera'] = main_scat.children[1]._fullLayout['scene']['camera']
+        }
+        return "";
+    }
+    """,
+                        Output('dummy-2', 'children'),
+                        Input('scatter3d', 'relayoutData'),
+                        State('scatter3d', 'figure'))
+
 
 if __name__ == "__main__":
     app.run_server(host='127.0.0.1', port='8050', debug=True)
