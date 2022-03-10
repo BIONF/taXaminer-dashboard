@@ -18,7 +18,6 @@ import numpy as np
 from utility import protein_io as taxaminer_files, required_functionalities as rf
 from utility import dataset as ds
 from utility import transformation
-import required_functionalities as rf
 import json
 
 import plotly.graph_objs as go
@@ -539,7 +538,9 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
                                      height=550)
 
     # get points
-    point_list_x = point_list_y = point_list_z = []
+    point_list_x = []
+    point_list_y = []
+    point_list_z = []
 
     # populate lists
     for x in range(pc_len):
@@ -548,7 +549,9 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
         point_list_z.append(pc3[x])
 
     # calc x,y,z
-    vector_list_x = vector_list_y = vector_list_z = []
+    vector_list_x = []
+    vector_list_y = []
+    vector_list_z = []
     for i in range(pc_len):
         vector_list_x.append(0)
         vector_list_x.append(point_list_x[i])
