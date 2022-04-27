@@ -22,15 +22,6 @@ import json
 
 import plotly.graph_objs as go
 
-"""
-DIRECTORY FORMAT:
-./data/<name of taXaminer run>/gene_info
-./data/<name of taXaminer run>/PCA_and_clustering
-./data/<name of taXaminer run>/taxonomic_assignment
-./data/<name of taXaminer run>/proteins.faa
-./data/<name of taXaminer run>/taxonomic_hits.txt
-"""
-
 output_path = "./data/"
 base_path = "./data/"
 datasets = []
@@ -63,6 +54,7 @@ recent_click_scat_data = None
 recent_select_data = None
 last_selection = None
 is_dataset_switch = False
+lock_contigs = False
 
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
@@ -70,7 +62,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
 app.title = "taXaminer"
 
 my_layout = layout.Layout()
-app.layout = my_layout.get_layout(dropdowns)
+app.layout = my_layout.get_layout(dropdowns, my_dataset.contigs)
 
 
 @app.callback(
@@ -135,7 +127,7 @@ def show_variable_description_pca(click_data):
 )
 def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     """
-    Update the column visible in all tabels
+    Update the column visible in all tables
     :param selected_vars: selection of dataframe columns to be shown
     :param sel_cols: current cols of 'selected' table
     :param legend_cols: current cols of 'legend'
@@ -190,12 +182,17 @@ def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks'),
     State('taxa_info2', 'data'),
-    State('evalue-slider', 'value')
+    State('evalue-slider', 'value'),
+    State('contig-selection', 'value')
 )
-def select(click_data, click_scat_data, select_data, selection_table_cell, search_data,
-           button_reset, button_add_legend_to_select, reload, taxa_list, e_value):
+def select(click_data, click_scat_data, select_data, selection_table_cell,
+           search_data, button_reset, button_add_legend_to_select, reload,
+           taxa_list, e_value, contigs):
     """
     Common function for different modes of selection from UI elements
+    :param contigs: selected contigs
+    :param e_value: current value of e-value filter
+    :param taxa_list:
     :param click_data: click data from scatterplot
     :param click_scat_data: scatterplot matrix click data
     :param select_data: select data from scatter matrix
@@ -314,7 +311,8 @@ def select(click_data, click_scat_data, select_data, selection_table_cell, searc
     if changed_id == 'button_add_legend_to_select.n_clicks' and not is_dataset_switch:
         # e-value filter
         e_value = 1 * math.e ** (-e_value)
-        df_data = my_dataset.get_plot_data({'e-value': e_value})
+        df_data = my_dataset.get_plot_data({'e-value': e_value,
+                                            'contigs': contigs})
 
         # removing error at the start of the program
         if taxa_list is None:
@@ -396,16 +394,21 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     Output('variable-selection', 'options'),
     Output('btn-sync', 'n_clicks'),
     Output('textarea-evalue', 'value'),
+    Output('contig-selection', 'options'),
+    Output('contig-selection', 'value'),
     Input('evalue-slider', 'value'),
     Input('dataset_select', 'value'),
     Input('colorscale-select', 'value'),
     State('slider-dot-size', 'value'),
     Input('reset-legend', 'n_clicks'),
-    State('scatter3d', 'relayoutData')
+    State('scatter3d', 'relayoutData'),
+    Input('contig-selection', 'value')
 )
-def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayout):
+def update_dataframe(value, new_path, color_root, dot_size, reset_legend,
+                     relayout, contigs):
     """
     Update dataset and apply filters
+    :param contigs: Selected contigs (list of str)
     :param value: value of e-value slider
     :param new_path: path to dataset
     :param color_root: a color hex string, which define the pole label color.
@@ -418,14 +421,18 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
     global my_dataset
     global path
 
+    # handle contig selection
+    global lock_contigs
+    contig_selection = []
+
     # Indicate a change of dataset
     global is_dataset_switch
     is_dataset_switch = True
 
-    # observer which component was updated
+    # observe which component was updated
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 
-    # update camera / legend?
+    # update camera / legend
     update_layout = True
     if changed_id in ['colorscale-select.value', 'slider-dot-size.value']:
         update_layout = False
@@ -435,6 +442,11 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
         my_dataset = ds.DataSet(new_path)
         path = new_path
         relayout = False
+        contig_selection = my_dataset.contigs
+        contigs = my_dataset.contigs
+        lock_contigs = True
+    else:
+        contig_selection = contigs
 
     if not path:
         raise PreventUpdate
@@ -450,7 +462,8 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
 
     # e-value filter
     value = 1 * math.e ** (-value)
-    my_data = my_dataset.get_plot_data({'e-value': value}, color_root)
+    my_data = my_dataset.get_plot_data({'e-value': value, 'contigs': contigs},
+                                       color_root)
 
     # 'protID' was renamed to 'fasta_header' in taXanimer commit a424195
     if 'protID' in my_dataset.get_data_original().columns:
@@ -613,7 +626,8 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend, relayo
             label_dictionary[i] = False
 
     # set n_clicks = 0 to toggle plot table reload
-    return my_fig, summary, contribution_fig, scree_fig, variables, 0, str(value)
+    return my_fig, summary, contribution_fig, scree_fig, variables, 0, \
+           str(value), my_dataset.contigs, contig_selection
 
 
 @app.callback(
@@ -667,8 +681,10 @@ def callbackChainTaxa(data):
     Output('legend_selection', 'data'),
     Input('btn-sync', 'n_clicks'),
     State('taxa_info2', 'data'),
-    State('evalue-slider', 'value'))
-def display_click_data(clicks, taxa_list, e_value):
+    State('evalue-slider', 'value'),
+    State('contig-selection', 'value')
+)
+def display_click_data(clicks, taxa_list, e_value, contigs):
     """
     function to update the table with the Taxa visble in plot
     :param clicks dash button n_clicks
@@ -696,7 +712,8 @@ def display_click_data(clicks, taxa_list, e_value):
 
     # e-value filter
     e_value = 1 * math.e ** (-e_value)
-    df_data = my_dataset.get_plot_data({'e-value': e_value})
+    df_data = my_dataset.get_plot_data({'e-value': e_value,
+                                        'contigs': contigs})
 
     # removing error at the start of the program
     if taxa_list is None:
