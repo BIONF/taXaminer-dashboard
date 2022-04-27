@@ -4,10 +4,12 @@ from dash import dcc, html, dash_table
 from dash.dash_table.Format import Format, Scheme
 import dash_daq as daq
 
+
 class Layout:
-    def get_layout(self, dropdowns):
+    def get_layout(self, dropdowns, contigs):
         """
         Builds an returns a layout
+        :param contigs: list of available contigs
         :param dropdowns: Dropdown options for dataset selection
         :param scatter_test: scatterplot
         :return: dash.Layout component
@@ -15,6 +17,7 @@ class Layout:
 
         # initial table variables
         variable_items = []
+
 
         # variable selection diamond data
         taxonomic_hits_vars = []
@@ -227,6 +230,14 @@ class Layout:
                                         className='m-2'
                                     ),
                                 ], className="m-2"),
+                                dbc.Card([
+                                    dcc.Dropdown(
+                                        options=contigs,
+                                        multi=True,
+                                        id='contig-selection',
+                                        value=contigs,
+                                    ),
+                                ], className="m-2")
                             ], label="Filter", className="m-2"),
                             dbc.Tab(label='PCA Data', children=[
                                 dbc.Row([
