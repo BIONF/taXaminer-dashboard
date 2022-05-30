@@ -126,12 +126,32 @@ class Layout:
                                                                'horizontalAlign': 'left'},
                                                     ),
                                                 ], className="m-2"),
+                                                dbc.Row([
+                                                    dbc.Col([
+                                                        dbc.Input(
+                                                            id='searchbar',
+                                                            placeholder="Enter Gene Name",
+                                                            invalid=True,
+                                                            className="d-grid",
+                                                            style={'width': 'fill'}
+                                                        ),
+                                                    ], width=10),
+                                                    dbc.Col([
+                                                        dbc.Button(
+                                                            "Go",
+                                                            id='searchbar_go',
+                                                            className="d-grid gap-2",
+                                                            style={'width': 'fill'}
+                                                        ),
+                                                    ], width=2)
+                                                ], className="m-1"),
                                                 dbc.Card([
                                                     dbc.CardHeader(
                                                         "Selected Gene"),
                                                     dcc.Textarea(
                                                         id='textarea-taxon',
-                                                        value='Textarea content initialized\nwith multiple lines of text',
+                                                        value="Click on a gene or use the searchbar to display its "
+                                                              "information here",
                                                         disabled=True,
                                                         style={'height': 200,
                                                                'width': 'fill',
@@ -464,16 +484,6 @@ class Layout:
                                     dcc.Download(id="download-selection"),
                                     dcc.Download(id="download-csv"),
                                 ]),
-                                dbc.Col([
-                                    dbc.Row([
-                                        dbc.Input(
-                                            id='searchbar',
-                                            placeholder="Enter Gene Name",
-                                            invalid=True,
-                                            className="d-flex m-2 radio-group"
-                                        ),
-                                    ])
-                                ], width=2),
                                 # table containing only selected assignments
                                 dash_table.DataTable(
                                     id='table_selection',

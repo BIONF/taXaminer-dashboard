@@ -57,6 +57,12 @@ class DataSet:
         # coverage variables
         self.c_covs, self.g_covs = self.filter_cov_variables()
 
+        # gene names
+        if not self.original_data.empty:
+            self.gene_names = self.original_data['g_name'].unique()
+        else:
+            self.gene_names = []
+
     def get_data_original(self):
         """
         Returns the unmodified dataframe as read from the .csv file on init
