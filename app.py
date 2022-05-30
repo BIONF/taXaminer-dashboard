@@ -66,36 +66,6 @@ app.layout = my_layout.get_layout(dropdowns, my_dataset.contigs)
 
 
 @app.callback(
-    Output('textarea-as', 'value'),
-    Input('scatter3d', 'clickData'),
-    Input('searchbar', 'value'))
-def print_seq_data(hover_data, search_data):
-    """
-    Update Sequence Data
-    :param hover_data:
-    :param search_data:
-    :return:
-    """
-    global path
-    if not path:
-        raise PreventUpdate
-
-    if not hover_data:
-        return "Hover of a data point to select it"
-        # Allow user search
-    if search_data:
-        my_dot = search_data
-    else:
-        # fetch fasta_header from hover data
-        my_dot = hover_data['points'][0]['customdata'][3]
-    seq = taxaminer_files.get_protein_record(my_dot, path)
-    if not seq:
-        return "No matching Sequence data"
-    else:
-        return str(seq.seq)
-
-
-@app.callback(
     Output('variable-info', 'value'),
     Input('contribution', 'clickData'))
 def show_variable_description_pca(click_data):
@@ -173,21 +143,22 @@ def update_table_columns(selected_vars, sel_cols, legend_cols, options):
     Output('textarea-taxon', 'value'),
     Output('table_selection', 'active_cell'),
     Output('table-hits', 'data'),
+    Output('textarea-as', 'value'),
     Input('scatter3d', 'clickData'),
     Input('scatter_matrix', 'clickData'),
     Input('scatter_matrix', 'selectedData'),
     Input('table_selection', 'active_cell'),
-    Input('searchbar', 'value'),
     Input('button_reset', 'n_clicks'),
     Input('button_add_legend_to_select', 'n_clicks'),
     Input('btn-reload', 'n_clicks'),
+    Input('searchbar_go', 'n_clicks'),
     State('taxa_info2', 'data'),
     State('evalue-slider', 'value'),
+    State('searchbar', 'value'),
     State('contig-selection', 'value')
 )
 def select(click_data, click_scat_data, select_data, selection_table_cell,
-           search_data, button_reset, button_add_legend_to_select, reload,
-           taxa_list, e_value, contigs):
+           button_reset, button_add_legend_to_select, reload, go_button, taxa_list, e_value, search_data, contigs):
     """
     Common function for different modes of selection from UI elements
     :param contigs: selected contigs
@@ -262,7 +233,7 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
         taxonomic_hits = my_dataset.get_taxonomic_hits(prot_id)
 
     # input from search bar
-    if search_data:
+    if changed_id == "searchbar_go.n_clicks":
         my_point = search_data
 
     # Gene information
@@ -348,7 +319,14 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
         taxonomic_hits.drop(['qseqid', 'sseqid'], axis=1, inplace=True)
         taxonomic_hits = taxonomic_hits.to_dict('records')
 
-    return my_dataset.get_selected_data().to_dict('records'), output_text, None, taxonomic_hits
+    # as sequence
+    seq = taxaminer_files.get_protein_record(my_point, path)
+    if seq:
+        seq = str(seq.seq)
+    else:
+        seq = "No sequence data found!"
+
+    return my_dataset.get_selected_data().to_dict('records'), output_text, None, taxonomic_hits, seq
 
 
 @app.callback(
@@ -802,6 +780,19 @@ def update_diamond_columns(selected_vars):
     for variable in selected_vars:
         columns.append({"name": variable, "id": variable})
     return columns
+
+
+@app.callback(
+    Output('searchbar', 'invalid'),
+    Output('searchbar', 'valid'),
+    Input('searchbar', 'value')
+)
+def update_searchbar(query):
+    """Check if a query is a valid gene name and recolor the searchbar accordingly"""
+    if query in my_dataset.gene_names:
+        return False, True
+    else:
+        return True, False
 
 
 app.clientside_callback(
