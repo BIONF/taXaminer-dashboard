@@ -177,7 +177,7 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
 
     taxonomic_hits = None
     my_point = ""
-    prot_id = None
+    fasta_header = None
     global recent_click_data
     global recent_click_scat_data
     global recent_select_data
@@ -189,6 +189,11 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
         raise PreventUpdate
 
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+    # we expect the user to use the fasta_header in the searchbar
+    if changed_id == "searchbar_go.n_clicks":
+        fasta_header = search_data
+
     # scatter matrix select
     if select_data and select_data != recent_select_data:
         recent_select_data = select_data
@@ -213,7 +218,7 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
     if click_data and click_data != recent_click_data:
         my_point = click_data['points'][0]['customdata'][1]
         recent_click_data = click_data
-        prot_id = click_data['points'][0]['customdata'][3]
+        fasta_header = click_data['points'][0]['customdata'][3]
 
     # input from table of selected genes
     if selection_table_cell:
@@ -224,13 +229,13 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
                     'g_name']
             if cell != last_selection:
                 my_point = cell
-                prot_id = my_dataset.get_fasta_header(my_point)
+                fasta_header = my_dataset.get_fasta_header(my_point)
         except IndexError:
             pass
 
     # taxonomic hits
-    if prot_id:
-        taxonomic_hits = my_dataset.get_taxonomic_hits(prot_id)
+    if fasta_header:
+        taxonomic_hits = my_dataset.get_taxonomic_hits(fasta_header)
 
     # input from search bar
     if changed_id == "searchbar_go.n_clicks":
