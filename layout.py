@@ -4,10 +4,12 @@ from dash import dcc, html, dash_table
 from dash.dash_table.Format import Format, Scheme
 import dash_daq as daq
 
+
 class Layout:
-    def get_layout(self, dropdowns):
+    def get_layout(self, dropdowns, contigs):
         """
         Builds an returns a layout
+        :param contigs: list of available contigs
         :param dropdowns: Dropdown options for dataset selection
         :param scatter_test: scatterplot
         :return: dash.Layout component
@@ -15,6 +17,7 @@ class Layout:
 
         # initial table variables
         variable_items = []
+
 
         # variable selection diamond data
         taxonomic_hits_vars = []
@@ -126,12 +129,32 @@ class Layout:
                                                                'horizontalAlign': 'left'},
                                                     ),
                                                 ], className="m-2"),
+                                                dbc.Row([
+                                                    dbc.Col([
+                                                        dbc.Input(
+                                                            id='searchbar',
+                                                            placeholder="Enter Gene Name",
+                                                            invalid=True,
+                                                            className="d-grid",
+                                                            style={'width': 'fill'}
+                                                        ),
+                                                    ], width=10),
+                                                    dbc.Col([
+                                                        dbc.Button(
+                                                            "Go",
+                                                            id='searchbar_go',
+                                                            className="d-grid gap-2",
+                                                            style={'width': 'fill'}
+                                                        ),
+                                                    ], width=2)
+                                                ], className="m-1"),
                                                 dbc.Card([
                                                     dbc.CardHeader(
                                                         "Selected Gene"),
                                                     dcc.Textarea(
                                                         id='textarea-taxon',
-                                                        value='Textarea content initialized\nwith multiple lines of text',
+                                                        value="Click on a gene or use the searchbar to display its "
+                                                              "information here",
                                                         disabled=True,
                                                         style={'height': 200,
                                                                'width': 'fill',
@@ -227,6 +250,14 @@ class Layout:
                                         className='m-2'
                                     ),
                                 ], className="m-2"),
+                                dbc.Card([
+                                    dcc.Dropdown(
+                                        options=contigs,
+                                        multi=True,
+                                        id='contig-selection',
+                                        value=contigs,
+                                    ),
+                                ], className="m-2")
                             ], label="Filter", className="m-2"),
                             dbc.Tab(label='PCA Data', children=[
                                 dbc.Row([
@@ -464,16 +495,6 @@ class Layout:
                                     dcc.Download(id="download-selection"),
                                     dcc.Download(id="download-csv"),
                                 ]),
-                                dbc.Col([
-                                    dbc.Row([
-                                        dbc.Input(
-                                            id='searchbar',
-                                            placeholder="Enter Gene Name",
-                                            invalid=True,
-                                            className="d-flex m-2 radio-group"
-                                        ),
-                                    ])
-                                ], width=2),
                                 # table containing only selected assignments
                                 dash_table.DataTable(
                                     id='table_selection',

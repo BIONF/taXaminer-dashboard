@@ -57,12 +57,36 @@ class DataSet:
         # coverage variables
         self.c_covs, self.g_covs = self.filter_cov_variables()
 
+        # contigs
+        self.contigs = self.original_data['c_name'].unique()
+
+        # gene names
+        if not self.original_data.empty:
+            self.gene_names = self.original_data['g_name'].unique()
+        else:
+            self.gene_names = []
+
     def get_data_original(self):
         """
         Returns the unmodified dataframe as read from the .csv file on init
         :return: pandas dataframe
         """
         return self.original_data
+
+    def get_empty_colored(self):
+        """
+        Provides a dataframe with additional color rows
+        :return:
+        """
+        # config file
+        config = ConfigParser()
+        config.read("./static/config.ini")
+        base_cols = config['Dataframe']['base_cols'].split(",")
+        # sythetic cols
+        base_cols.append('taxa_color')
+        base_cols.append('plot_label_v')
+        new_data = pd.DataFrame(data=[], columns=base_cols)
+        return new_data
 
     def get_plot_data(self, filters, color_root=None):
         """
@@ -75,6 +99,13 @@ class DataSet:
         e_value = filters.get('e-value')
         plot_data = original_data[original_data.bh_evalue < e_value]
 
+        # contig filter
+        contigs = filters.get('contigs')
+
+        # on startup contigs will be none
+        if contigs is not None:
+            plot_data = plot_data[plot_data['c_name'].isin(contigs)]
+
         # add
         # color legend
         color_data = pd.DataFrame({'plot_label': plot_data['plot_label'].unique(),
@@ -82,13 +113,20 @@ class DataSet:
                                        len(plot_data['plot_label'].unique()), color_root)
                                    })
 
-        plot_data = plot_data.merge(color_data, left_on='plot_label', right_on='plot_label')
+        # merge using plot label as key
+        plot_data = plot_data.merge(color_data,
+                                    left_on='plot_label',
+                                    right_on='plot_label')
 
         # modify plot label to show appearance data
         taxon_counts = dict(plot_data['plot_label'].value_counts())
         for index, row in plot_data.iterrows():
             new_label = row['plot_label'] + " (" + str(taxon_counts.get(row['plot_label'])) + ")"
             plot_data.at[index, 'plot_label_v'] = new_label
+
+        # filler
+        if contigs == []:
+            plot_data = self.get_empty_colored()
         return plot_data
 
     def selected_merge(self, data=None):
