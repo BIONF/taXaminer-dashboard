@@ -22,6 +22,9 @@ import json
 
 import plotly.graph_objs as go
 
+# callbacks
+from callbacks import contig_selection
+
 output_path = "./data/"
 base_path = "./data/"
 datasets = []
@@ -56,6 +59,9 @@ last_selection = None
 is_dataset_switch = False
 lock_contigs = False
 
+# store selection information here
+selection_contig = ""
+
 # Init app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
                                                 dbc.icons.FONT_AWESOME])
@@ -64,6 +70,7 @@ app.title = "taXaminer"
 my_layout = layout.Layout()
 app.layout = my_layout.get_layout(dropdowns, my_dataset.contigs)
 
+contig_selection.import_callbacks(app)
 
 @app.callback(
     Output('variable-info', 'value'),
@@ -331,6 +338,10 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
     else:
         seq = "No sequence data found!"
 
+    # update contig
+    global selection_contig
+    selection_contig = gene_data['c_name'].item()
+
     return my_dataset.get_selected_data().to_dict('records'), output_text, None, taxonomic_hits, seq
 
 
@@ -385,10 +396,11 @@ def update_selection_mode(button_add, button_remove, button_neutral):
     State('slider-dot-size', 'value'),
     Input('reset-legend', 'n_clicks'),
     State('scatter3d', 'relayoutData'),
-    Input('contig-selection', 'value')
+    Input('contig-selection', 'value'),
+    Input('contig_info', 'data'),
 )
 def update_dataframe(value, new_path, color_root, dot_size, reset_legend,
-                     relayout, contigs):
+                     relayout, contigs, contig_info):
     """
     Update dataset and apply filters
     :param contigs: Selected contigs (list of str)
@@ -431,6 +443,17 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend,
     else:
         contig_selection = contigs
 
+    # contig selections
+    if changed_id == 'contig_info.data':
+        print(contig_info)
+        if contig_info['reset']:
+            contigs = []
+        elif contig_info['select_current']:
+            global selection_contig
+            contigs = [selection_contig]
+        else:
+            contigs = my_dataset.contigs
+
     if not path:
         raise PreventUpdate
 
@@ -456,7 +479,7 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend,
         header_name = 'fasta_header'
 
     my_fig = px.scatter_3d(my_data, x='Dim.1', y='Dim.2', z='Dim.3',
-                           color='plot_label_v',
+                           color='plot_label',
                            hover_data=['plot_label', 'g_name', 'best_hit',
                                        'bh_evalue', 'taxon_assignment',
                                        'c_name'],
@@ -610,7 +633,7 @@ def update_dataframe(value, new_path, color_root, dot_size, reset_legend,
 
     # set n_clicks = 0 to toggle plot table reload
     return my_fig, summary, contribution_fig, scree_fig, variables, 0, \
-           str(value), my_dataset.contigs, contig_selection
+           str(value), my_dataset.contigs, contigs
 
 
 @app.callback(

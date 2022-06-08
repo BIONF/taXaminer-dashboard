@@ -18,7 +18,6 @@ class Layout:
         # initial table variables
         variable_items = []
 
-
         # variable selection diamond data
         taxonomic_hits_vars = []
         taxonomic_cols_initial = []
@@ -57,7 +56,8 @@ class Layout:
             dcc.Store(id="taxa_info2"),
             dbc.Modal(  # startup dataset selection card
                 [
-                    dbc.ModalHeader(dbc.ModalTitle("Welcome to taXaminer"), close_button=True),
+                    dbc.ModalHeader(dbc.ModalTitle("Welcome to taXaminer"),
+                                    close_button=True),
                     dbc.ModalBody(children=[
                         dbc.Card(children=[
                             dbc.CardHeader(id="mod1-head-select",
@@ -136,7 +136,8 @@ class Layout:
                                                             placeholder="Enter Gene Name",
                                                             invalid=True,
                                                             className="d-grid",
-                                                            style={'width': 'fill'}
+                                                            style={
+                                                                'width': 'fill'}
                                                         ),
                                                     ], width=10),
                                                     dbc.Col([
@@ -144,10 +145,16 @@ class Layout:
                                                             "Go",
                                                             id='searchbar_go',
                                                             className="d-grid gap-2",
-                                                            style={'width': 'fill'}
+                                                            style={
+                                                                'width': 'fill'}
                                                         ),
                                                     ], width=2)
                                                 ], className="m-1"),
+                                                dbc.Row([
+                                                   dbc.Col([
+
+                                                   ]),
+                                                ]),
                                                 dbc.Card([
                                                     dbc.CardHeader(
                                                         "Selected Gene"),
@@ -160,18 +167,35 @@ class Layout:
                                                                'width': 'fill',
                                                                "verticalAlign": "top",
                                                                'horizontalAlign': 'left'},
+                                                        className="m-2"
                                                     ),
-                                                    html.Div([
-                                                        dbc.Button(
-                                                            "Find Taxonomy on NCBI",
-                                                            id='NCBI',
-                                                            href="https://www.ncbi.nlm.nih.gov/",
-                                                            external_link=True,
-                                                            color='primary',
-                                                            target='_blank',
-                                                        ),
-                                                    ],
-                                                        className="d-grid gap-2")
+                                                    dbc.Row([
+                                                        dbc.Col([
+                                                            dbc.ButtonGroup([
+                                                                dbc.Button(
+                                                                    "Find Taxonomy on NCBI",
+                                                                    id='NCBI',
+                                                                    href="https://www.ncbi.nlm.nih.gov/",
+                                                                    external_link=True,
+                                                                    color='primary',
+                                                                    target='_blank',
+                                                                    style={
+                                                                        'width': '100%'},
+                                                                    className="m-2"
+                                                                ),
+                                                                dbc.Button(
+                                                                    "Filter genes from same contig",
+                                                                    id='single_contig',
+                                                                    color='primary',
+                                                                    style={
+                                                                        'width': '100%'},
+                                                                    className="m-2"
+                                                                ),
+                                                            ], style={'width': '100%'},
+                                                            ),
+
+                                                        ]),
+                                                    ]),
                                                 ], className="m-2"),
                                                 dbc.Card([
                                                     dbc.CardHeader(
@@ -251,13 +275,39 @@ class Layout:
                                     ),
                                 ], className="m-2"),
                                 dbc.Card([
-                                    dcc.Dropdown(
-                                        options=contigs,
-                                        multi=True,
-                                        id='contig-selection',
-                                        value=contigs,
-                                    ),
-                                ], className="m-2")
+                                    # store info here
+                                    dcc.Store(id="contig_info"),
+                                    dbc.CardHeader("Contig Selection"),
+                                    dbc.Row([
+                                        dbc.Col([
+                                            dcc.Dropdown(
+                                                options=contigs,
+                                                multi=True,
+                                                id='contig-selection',
+                                                value=contigs,
+                                                className="m-2",
+                                                style={'height': '100px'},
+                                                clearable=False
+                                            ),
+                                        ], width=8, style={"overflow-y": "scroll",
+                                                       'height': '250px'},),
+                                        dbc.Col([
+                                            dbc.ButtonGroup([
+                                                dbc.Button([
+                                                    html.Span(["Select All"])],
+                                                    color="success",
+                                                    id="button_all_contigs",
+                                                ),
+                                                dbc.Button([
+                                                    html.Span([html.I(
+                                                        className="fas fa-trash")])],
+                                                    color="danger",
+                                                    id="button_reset_contigs",
+                                                ),
+                                            ], className="m-2"),
+                                        ], width=4),
+                                    ]),
+                                ], className="m-2", style={'height': '300px'})
                             ], label="Filter", className="m-2"),
                             dbc.Tab(label='PCA Data', children=[
                                 dbc.Row([
