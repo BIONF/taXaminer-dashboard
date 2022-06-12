@@ -191,10 +191,8 @@ class DataSet:
         :param key: th g_name
         :return:
         """
-        try:
+        if key in self.selection_keys:
             self.selection_keys.remove(key)
-        except KeyError:
-            print("Can't unselect a not selected element: " + key)
 
     def reset_selection(self):
         """
