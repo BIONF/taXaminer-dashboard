@@ -340,7 +340,11 @@ def select(click_data, click_scat_data, select_data, selection_table_cell,
 
     # update contig
     global selection_contig
-    selection_contig = gene_data['c_name'].item()
+    if len(gene_data['c_name']) == 1:
+        # if we select multiple elements (scatter matrix) select_contig will be
+        # a pandas Series of size != 1. Don't update selection_contig on
+        # multi-select
+        selection_contig = gene_data['c_name'].item()
 
     return my_dataset.get_selected_data().to_dict('records'), output_text, None, taxonomic_hits, seq
 
@@ -725,7 +729,7 @@ def display_click_data(clicks, taxa_list, e_value, contigs):
     if taxa_list is None:
         return df_data.to_dict('records')
 
-    return df_data[df_data.plot_label_v.isin(taxa_list)].to_dict('records')
+    return df_data[df_data.plot_label.isin(taxa_list)].to_dict('records')
 
 
 @app.callback(
